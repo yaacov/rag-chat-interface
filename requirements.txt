@@ -1,0 +1,11 @@
+langchain-community
+langchain>=0.0.340
+pymilvus>=2.3.3
+sentence-transformers
+torch>=2.1.1
+transformers>=4.35.2
+tqdm
+requests
+black>=23.0.0
+fastapi>=0.104.1
+uvicorn>=0.24.0

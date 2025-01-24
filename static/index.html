@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RAG Chat Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Add marked.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .chat-box { 
+            margin: 20px 0;
+            background-color: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        textarea { 
+            width: 100%; 
+            height: 100px;
+            font-family: 'Roboto', sans-serif;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            margin: 0;
+            background-color: #fafafa;
+            transition: background-color 0.3s ease;
+            box-sizing: border-box;
+            resize: none;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+        }
+        textarea:focus {
+            outline: none;
+            background-color: #f5f5f5;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
+        }
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        button { 
+            padding: 12px 24px;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 500;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+        button:hover {
+            transform: translateY(-1px);
+        }
+        #askButton {
+            background-color: #2fa784;
+        }
+        #askButton:hover {
+            background-color: #268c6e;
+        }
+        #helpButton {
+            background-color: #4a90d9;
+        }
+        #helpButton:hover {
+            background-color: #3576b7;
+        }
+        #infoButton {
+            background-color: #9b4dca;
+        }
+        #infoButton:hover {
+            background-color: #7e3ca3;
+        }
+        button:disabled {
+            background-color: #e0e0e0 !important;
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.7;
+        }
+        .loading {
+            display: none;
+            margin: 20px 0;
+            font-family: 'Roboto', sans-serif;
+            color: #666;
+        }
+        @keyframes ellipsis {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+            100% { content: ''; }
+        }
+        .loading::after {
+            content: '';
+            display: inline-block;
+            animation: ellipsis 2s infinite;
+            width: 20px;
+            text-align: left;
+        }
+        #response {
+            background-color: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        /* Add styles for markdown content */
+        .markdown-content {
+            line-height: 1.2;
+        }
+        .markdown-content code {
+            background-color: #f3f3f3;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+            line-height: 1.5; /* Added line height for inline code */
+        }
+        .markdown-content pre {
+            background-color: #f3f3f3;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            line-height: 1.5; /* Added line height for code blocks */
+        }
+        .markdown-content ul, .markdown-content ol {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>RAG Chat Interface</h1>
+    <div class="chat-box">
+        <textarea id="question" placeholder="Enter your question here..."></textarea>
+        <div class="button-group">
+            <button id="askButton" onclick="askQuestion()">Ask</button>
+            <button id="helpButton" onclick="showHelp()">Help</button>
+            <button id="infoButton" onclick="showInfo()">Show Info</button>
+        </div>
+    </div>
+    <div id="loading" class="loading">Thinking</div>
+    <div id="response"></div>
+
+    <script>
+        async function askQuestion() {
+            const question = document.getElementById('question').value;
+            const loadingDiv = document.getElementById('loading');
+            const responseDiv = document.getElementById('response');
+            const askButton = document.getElementById('askButton');
+            const helpButton = document.getElementById('helpButton');
+            const infoButton = document.getElementById('infoButton');
+            
+            loadingDiv.style.display = 'block';
+            askButton.disabled = true;
+            helpButton.disabled = true;
+            infoButton.disabled = true;
+            responseDiv.innerHTML = '';
+            
+            try {
+                if (question.toLowerCase().startsWith('read:')) {
+                    const source = question.substring(5).trim();
+                    const response = await fetch('/read', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({source: source})
+                    });
+                    const data = await response.json();
+                    responseDiv.innerHTML = `<p><strong>Status:</strong> ${data.message}</p>`;
+                } else {
+                    const response = await fetch('/ask', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({text: question})
+                    });
+                    const data = await response.json();
+                    const parsedMarkdown = marked.parse(data.response);
+                    responseDiv.innerHTML = `<div class="markdown-content">${parsedMarkdown}</div>`;
+                }
+            } catch (error) {
+                responseDiv.innerHTML = `<p style="color: red;"><strong>Error:</strong> ${error.message}</p>`;
+            } finally {
+                loadingDiv.style.display = 'none';
+                askButton.disabled = false;
+                helpButton.disabled = false;
+                infoButton.disabled = false;
+            }
+        }
+        
+        async function showHelp() {
+            const responseDiv = document.getElementById('response');
+            const askButton = document.getElementById('askButton');
+            const helpButton = document.getElementById('helpButton');
+            const infoButton = document.getElementById('infoButton');
+            
+            helpButton.disabled = true;
+            askButton.disabled = true;
+            infoButton.disabled = true;
+            
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text: 'help'})
+                });
+                const data = await response.json();
+                const parsedMarkdown = marked.parse(data.response);
+                responseDiv.innerHTML = `<div class="markdown-content">${parsedMarkdown}</div>`;
+            } catch (error) {
+                responseDiv.innerHTML = `<p style="color: red;"><strong>Error:</strong> ${error.message}</p>`;
+            } finally {
+                helpButton.disabled = false;
+                askButton.disabled = false;
+                infoButton.disabled = false;
+            }
+        }
+
+        async function showInfo() {
+            const responseDiv = document.getElementById('response');
+            const askButton = document.getElementById('askButton');
+            const helpButton = document.getElementById('helpButton');
+            const infoButton = document.getElementById('infoButton');
+            const loadingDiv = document.getElementById('loading');
+            
+            loadingDiv.style.display = 'block';
+            infoButton.disabled = true;
+            helpButton.disabled = true;
+            askButton.disabled = true;
+            
+            try {
+                const response = await fetch('/ask', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text: 'dump'})
+                });
+                const data = await response.json();
+                let infoHtml = '<h3>System Information:</h3><ul>';
+                for (const [key, value] of Object.entries(data)) {
+                    infoHtml += `<li><strong>${key}:</strong> ${value}</li>`;
+                }
+                infoHtml += '</ul>';
+                responseDiv.innerHTML = infoHtml;
+            } catch (error) {
+                responseDiv.innerHTML = `<p style="color: red;"><strong>Error:</strong> ${error.message}</p>`;
+            } finally {
+                loadingDiv.style.display = 'none';
+                infoButton.disabled = false;
+                helpButton.disabled = false;
+                askButton.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
