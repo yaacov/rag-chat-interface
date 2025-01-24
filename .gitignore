@@ -25,6 +25,7 @@ venv/
 ENV/
 env/
 .env
+myenv
 
 # IDE
 .idea/
@@ -44,3 +45,4 @@ volumes/
 # Milvus
 milvus/
 rag_milvus.db
+.rag_milvus.db.lock

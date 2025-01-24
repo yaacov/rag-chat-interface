@@ -20,12 +20,17 @@ A Retrieval-Augmented Generation (RAG) chat interface that allows users to load 
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yaacov/rag.git
-cd rag
+git clone https://github.com/yaacov/rag-chat-interface.git
+cd rag-chat-interface
 ```
 
 2. Install dependencies:
 ```bash
+# Optional: set a virtual env
+python3.10 -m venv myenv
+source myenv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
