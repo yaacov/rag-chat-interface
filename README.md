@@ -2,6 +2,10 @@
 
 A Retrieval-Augmented Generation (RAG) chat interface that allows users to load documents and ask questions about their content. The system uses language models for text generation and embeddings, with Milvus as the vector database.
 
+## Demo
+
+![Demo GIF](static/rag.gif)
+
 ## Features
 
 - Interactive web interface for document Q&A
