@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from typing import Optional
 import uvicorn
 import os
+import torch
 
 # Constants
 LLM_MODEL_NAME = "ibm-granite/granite-3.1-2b-instruct"
@@ -91,29 +92,41 @@ def parse_args():
     return parser.parse_args()
 
 
+def cleanup_cuda_memory():
+    """Clean up CUDA memory if it's being used."""
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        torch.cuda.ipc_collect()
+
 def generate_response(question):
     """Generate a response to a given question using the model and Milvus database."""
-    search_res = search_milvus_db(milvus_client, embedding_model, question)
-    retrieved_lines_with_distances = [
-        (res["entity"]["text"], res["distance"]) for res in search_res[0]
-    ]
+    try:
+        search_res = search_milvus_db(milvus_client, embedding_model, question)
+        retrieved_lines_with_distances = [
+            (res["entity"]["text"], res["distance"]) for res in search_res[0]
+        ]
 
-    content = generate_prompt(retrieved_lines_with_distances, question)
+        content = generate_prompt(retrieved_lines_with_distances, question)
 
-    chat_data = [
-        {"role": "user", "content": content},
-    ]
-    chat = tokenizer.apply_chat_template(
-        chat_data, tokenize=False, add_generation_prompt=True
-    )
-    input_tokens = tokenizer(chat, return_tensors="pt").to(device)
+        chat_data = [
+            {"role": "user", "content": content},
+        ]
+        chat = tokenizer.apply_chat_template(
+            chat_data, tokenize=False, add_generation_prompt=True
+        )
+        input_tokens = tokenizer(chat, return_tensors="pt").to(device)
 
-    output = model.generate(**input_tokens, max_new_tokens=500)
-    output = tokenizer.batch_decode(output)
+        output = model.generate(**input_tokens, max_new_tokens=500)
+        output = tokenizer.batch_decode(output)
 
-    response = clean_assistant_response(output[0])
-
-    return response
+        response = clean_assistant_response(output[0])
+        
+        cleanup_cuda_memory()
+        
+        return response
+    except Exception as e:
+        cleanup_cuda_memory()
+        raise e
 
 
 def load_source_and_insert_data(source, chunk_size=1000, chunk_overlap=200):

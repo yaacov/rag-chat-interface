@@ -54,8 +54,11 @@ def download_if_url(source: str) -> str:
 
 def load_and_split_html(source: str, chunk_size: int = 1000, chunk_overlap: int = 200):
     """Handle html files specifically."""
-    loader = BSHTMLLoader(source)
-    documents = loader.load()
+    try:
+        loader = BSHTMLLoader(source)
+        documents = loader.load()
+    except Exception as e:
+        raise ValueError(f"Failed to load HTML file: {e}")
 
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
