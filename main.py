@@ -9,8 +9,8 @@ import os
 import torch
 
 # Constants
-LLM_MODEL_NAME = "ibm-granite/granite-3.1-2b-instruct"
-EMBEDDING_MODEL_NAME = "ibm-granite/granite-embedding-30m-english"
+LLM_MODEL_NAME = "ibm-granite/granite-3.1-2b-instruct" # choose model size: 2b / 8b
+EMBEDDING_MODEL_NAME = "ibm-granite/granite-embedding-30m-english" # choose model size: 30m /125m
 
 # Add after the constants section
 HELP_TEXT = """
