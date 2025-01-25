@@ -63,7 +63,7 @@ Arguments:
 
 The system uses the following model configurations:
 - LLM Model: `ibm-granite/granite-3.1-2b-instruct`
-- Embedding Model: `BAAI/bge-small-en-v1.5`
+- Embedding Model: `ibm-granite/granite-embedding-30m-english`
 
 ## License
 

@@ -10,7 +10,7 @@ import torch
 
 # Constants
 LLM_MODEL_NAME = "ibm-granite/granite-3.1-2b-instruct"
-EMBEDDING_MODEL_NAME = "BAAI/bge-small-en-v1.5"
+EMBEDDING_MODEL_NAME = "ibm-granite/granite-embedding-30m-english"
 
 # Add after the constants section
 HELP_TEXT = """

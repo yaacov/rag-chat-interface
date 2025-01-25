@@ -27,12 +27,12 @@ def get_llm_model(model_path="ibm-granite/granite-3.1-2b-instruct", device=None)
     return tokenizer, model
 
 
-def get_embedding_model(model_name="BAAI/bge-small-en-v1.5", device=None):
+def get_embedding_model(model_name="ibm-granite/granite-embedding-30m-english", device=None):
     """Initialize and return a sentence transformer model for embeddings.
 
     Args:
         model_name (str, optional): Name or path of the sentence transformer model.
-            Defaults to "BAAI/bge-small-en-v1.5".
+            Defaults to "ibm-granite/granite-embedding-30m-english".
         device (str, optional): Device to load the model on ('cuda', 'cpu', etc.).
             If None, will be automatically determined. Defaults to None.
 
