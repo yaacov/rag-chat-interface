@@ -113,7 +113,7 @@ def search_milvus_db(
     search_res = milvus_client.search(
         collection_name=collection_name,
         data=[emb_text(embedding_model, question)],
-        limit=3,
+        limit=5,
         search_params={"metric_type": "IP", "params": {}},
         output_fields=["text"],
     )
