@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>RAG Chat Interface</title>
+    <title>DocuChat AI</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
     <!-- Add Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -154,6 +154,14 @@
             text-align: center;
             border-top: 1px solid #eaeaea;
         }
+        .project-description {
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.5;
+            margin: 1em 0 2em;
+            text-align: center;
+            padding: 0 20px;
+        }
     </style>
 </head>
 <body>
@@ -176,6 +184,46 @@
     </footer>
 
     <script>
+        const HELP_TEXT = `# Help
+## Basic Usage
+- Type your question in the text box and click "Ask"
+- The AI will respond based on the loaded documents
+
+## Commands
+- To load a document, use: \`read: URL_OR_PATH\`
+- Or simply paste a URL directly
+- Use \`help\` to see this help message
+- Use \`dump\` to see system information
+
+## Examples
+1. Load a document:
+   \`read: https://example.com/doc.pdf\`
+   \`read: /path/to/local/file.txt\`
+
+2. Ask questions:
+   "What are the main points in the document?"
+   "Summarize the key findings"`;
+
+        function isReadCommand(text) {
+            // Check if text starts with read: or load: (case insensitive)
+            const isCommand = /^(read:|load:)/i.test(text.trim());
+            
+            // Check if text looks like a URL
+            const urlPattern = /^(https?:\/\/)?[\w-]+(\.[\w-]+)+[/#?]?.*$/i;
+            const isUrl = urlPattern.test(text.trim());
+            
+            // Extract the source URL/path
+            let source = text.trim();
+            if (isCommand) {
+                source = text.substring(text.indexOf(':') + 1).trim();
+            }
+            
+            return {
+                isReadCommand: isCommand || isUrl,
+                source: source
+            };
+        }
+
         async function askQuestion() {
             const question = document.getElementById('question').value;
             const loadingDiv = document.getElementById('loading');
@@ -191,12 +239,12 @@
             responseDiv.innerHTML = '';
             
             try {
-                if (question.toLowerCase().startsWith('read:')) {
-                    const source = question.substring(5).trim();
+                const readCommand = isReadCommand(question);
+                if (readCommand.isReadCommand) {
                     const response = await fetch('/read', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({source: source})
+                        body: JSON.stringify({source: readCommand.source})
                     });
                     const data = await response.json();
                     responseDiv.innerHTML = `<p><strong>Status:</strong> ${data.message}</p>`;
@@ -231,13 +279,7 @@
             infoButton.disabled = true;
             
             try {
-                const response = await fetch('/ask', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({text: 'help'})
-                });
-                const data = await response.json();
-                const parsedMarkdown = marked.parse(data.response);
+                const parsedMarkdown = marked.parse(HELP_TEXT);
                 responseDiv.innerHTML = `<div class="markdown-content">${parsedMarkdown}</div>`;
             } catch (error) {
                 responseDiv.innerHTML = `<p style="color: red;"><strong>Error:</strong> ${error.message}</p>`;
