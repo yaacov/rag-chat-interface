@@ -6,6 +6,8 @@ from pydantic import BaseModel
 from typing import Optional
 import uvicorn
 import torch
+import os
+from pathlib import Path
 
 # Constants
 LLM_MODEL_NAME = "ibm-granite/granite-3.1-2b-instruct"  # choose model size: 2b / 8b
@@ -27,6 +29,9 @@ HELP_TEXT = """
 - "read: https://example.com/doc.md"
 - "help"
 """
+
+# Add after the Constants section
+SUPPORTED_EXTENSIONS = {'.txt', '.md', '.pdf', '.html', '.htm'}
 
 from src.vector_store import (
     create_milvus_collection,
@@ -78,7 +83,7 @@ def parse_args():
     parser.add_argument(
         "--source",
         type=str,
-        help="Initial source to load (optional).",
+        help="Initial source to load - can be a file, directory, or URL (optional).",
     )
     parser.add_argument(
         "--chunk_size",
@@ -144,13 +149,30 @@ def generate_response(question):
         raise e
 
 
-def load_source_and_insert_data(source, chunk_size=1000, chunk_overlap=200):
-    """Load the source file and insert data into the Milvus database."""
-    chunks = load_and_split(source, chunk_size, chunk_overlap)
-    text_lines = [chunk.page_content for chunk in chunks]
+def get_supported_files(directory):
+    """Recursively get all supported files from a directory."""
+    supported_files = []
+    for path in Path(directory).rglob('*'):
+        if path.suffix.lower() in SUPPORTED_EXTENSIONS:
+            supported_files.append(str(path))
+    return supported_files
 
-    data = embed_data(embedding_model, text_lines)
-    insert_data_in_db(milvus_client, data)
+def load_source_and_insert_data(source, chunk_size=1000, chunk_overlap=200):
+    """Load the source file/directory and insert data into the Milvus database."""
+    if os.path.isdir(source):
+        files = get_supported_files(source)
+        if not files:
+            raise ValueError(f"No supported files found in directory {source}")
+        for file_path in files:
+            chunks = load_and_split(file_path, chunk_size, chunk_overlap)
+            text_lines = [chunk.page_content for chunk in chunks]
+            data = embed_data(embedding_model, text_lines)
+            insert_data_in_db(milvus_client, data)
+    else:
+        chunks = load_and_split(source, chunk_size, chunk_overlap)
+        text_lines = [chunk.page_content for chunk in chunks]
+        data = embed_data(embedding_model, text_lines)
+        insert_data_in_db(milvus_client, data)
 
 
 def setup_collection():

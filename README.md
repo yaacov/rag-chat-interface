@@ -22,11 +22,15 @@ A powerful and secure document interaction system that transforms any document i
 - No external API calls - all processing happens within your network
 - Self-contained AI models running locally
 - Interactive web interface for document Q&A
-- Support for loading content from local files and URLs
+- Support for loading content from:
+  - Local files
+  - Local directories (recursive scanning)
+  - URLs
 - Support for multiple document formats:
   - PDF documents
   - HTML pages
   - Markdown files
+  - Plain text files
 - Flexible model selection to balance performance and resource usage
 - Configurable AI models to match your hardware capabilities
 
@@ -73,6 +77,7 @@ Arguments:
 - Ask any question about loaded documents
 - Type `dump` to see system information
 - Type `read: URL_OR_FILE` to load new content
+- Type `read: /path/to/directory` to load all supported files from a directory
 - Type `help` to see the help message
 
 ## Local AI models
