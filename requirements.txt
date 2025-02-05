@@ -12,3 +12,4 @@ uvicorn>=0.24.0
 accelerate>=0.26.0
 beautifulsoup4
 lxml
+pymupdf

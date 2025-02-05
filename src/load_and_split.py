@@ -4,6 +4,7 @@ import tempfile
 from urllib.parse import urlparse
 from langchain_community.document_loaders import TextLoader, BSHTMLLoader
 from langchain.text_splitter import MarkdownTextSplitter, RecursiveCharacterTextSplitter
+from langchain_community.document_loaders import PyPDFLoader
 
 
 def load_and_split(source: str, chunk_size: int = 1000, chunk_overlap: int = 200):
@@ -17,6 +18,8 @@ def load_and_split(source: str, chunk_size: int = 1000, chunk_overlap: int = 200
         return load_and_split_html(local_source, chunk_size, chunk_overlap)
     elif file_type == "markdown":
         return load_and_split_markdown(local_source, chunk_size, chunk_overlap)
+    elif file_type == "pdf":
+        return load_and_split_pdf(local_source, chunk_size, chunk_overlap)
     else:
         return load_and_split_text(local_source, chunk_size, chunk_overlap)
 
@@ -26,6 +29,8 @@ def get_file_type(source: str) -> str:
         return "html"
     if source.lower().endswith(".md"):
         return "markdown"
+    if source.lower().endswith(".pdf"):
+        return "pdf"
 
     return "text"
 
@@ -50,6 +55,35 @@ def download_if_url(source: str) -> str:
             f.write(response.text)
         return temp_path
     return source
+
+
+def load_and_split_text(source: str, chunk_size: int = 1000, chunk_overlap: int = 200):
+    """Handle plain text files specifically."""
+    loader = TextLoader(source)
+    documents = loader.load()
+
+    splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+        separators=[
+            "\n\n",  # Paragraphs
+            "\n",  # Line breaks
+            ". ",  # Sentences
+            "? ",  # Questions
+            "! ",  # Exclamations
+            "; ",  # Semi-colons
+            ":",  # Colons
+            ",",  # Commas
+            " ",  # Words
+            "",  # Characters
+        ],
+    )
+
+    split_documents = []
+    for doc in documents:
+        split_documents.extend(splitter.split_documents([doc]))
+
+    return split_documents
 
 
 def load_and_split_html(source: str, chunk_size: int = 1000, chunk_overlap: int = 200):
@@ -83,10 +117,28 @@ def load_and_split_html(source: str, chunk_size: int = 1000, chunk_overlap: int 
     return split_documents
 
 
-def load_and_split_text(source: str, chunk_size: int = 1000, chunk_overlap: int = 200):
-    """Handle plain text files specifically."""
+def load_and_split_markdown(
+    source: str, chunk_size: int = 1000, chunk_overlap: int = 200
+):
+    """Handle markdown files specifically."""
     loader = TextLoader(source)
     documents = loader.load()
+
+    splitter = MarkdownTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    split_documents = []
+    for doc in documents:
+        split_documents.extend(splitter.split_documents([doc]))
+
+    return split_documents
+
+
+def load_and_split_pdf(source: str, chunk_size: int = 1000, chunk_overlap: int = 200):
+    """Handle PDF files specifically."""
+    try:
+        loader = PyPDFLoader(source)
+        documents = loader.load()
+    except Exception as e:
+        raise ValueError(f"Failed to load PDF file: {e}")
 
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=chunk_size,
@@ -105,21 +157,6 @@ def load_and_split_text(source: str, chunk_size: int = 1000, chunk_overlap: int 
         ],
     )
 
-    split_documents = []
-    for doc in documents:
-        split_documents.extend(splitter.split_documents([doc]))
-
-    return split_documents
-
-
-def load_and_split_markdown(
-    source: str, chunk_size: int = 1000, chunk_overlap: int = 200
-):
-    """Handle markdown files specifically."""
-    loader = TextLoader(source)
-    documents = loader.load()
-
-    splitter = MarkdownTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     split_documents = []
     for doc in documents:
         split_documents.extend(splitter.split_documents([doc]))

@@ -5,12 +5,13 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import Optional
 import uvicorn
-import os
 import torch
 
 # Constants
-LLM_MODEL_NAME = "ibm-granite/granite-3.1-2b-instruct" # choose model size: 2b / 8b
-EMBEDDING_MODEL_NAME = "ibm-granite/granite-embedding-30m-english" # choose model size: 30m /125m
+LLM_MODEL_NAME = "ibm-granite/granite-3.1-2b-instruct"  # choose model size: 2b / 8b
+EMBEDDING_MODEL_NAME = (
+    "ibm-granite/granite-embedding-30m-english"  # choose model size: 30m /125m
+)
 
 # Add after the constants section
 HELP_TEXT = """
@@ -40,14 +41,17 @@ from src.model_setup import get_llm_model, get_embedding_model
 from src.milvus_setup import get_milvus_client
 from src.prompt_utils import generate_prompt, clean_assistant_response
 
+
 # Define API models
 class Question(BaseModel):
     text: str
+
 
 class ReadSource(BaseModel):
     source: str
     chunk_size: Optional[int] = 1000
     chunk_overlap: Optional[int] = 200
+
 
 # Create FastAPI app
 app = FastAPI()
@@ -55,15 +59,17 @@ app = FastAPI()
 # Add this after creating the FastAPI app
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     with open("static/index.html", "r") as f:
         return f.read()
 
+
 device = get_device()
 tokenizer, model = get_llm_model(model_path=LLM_MODEL_NAME, device=device)
-milvus_client = get_milvus_client("./rag_milvus.db")
 embedding_model = get_embedding_model(model_name=EMBEDDING_MODEL_NAME, device=device)
+
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -87,7 +93,15 @@ def parse_args():
         help="Overlap between chunks (default: 200 characters).",
     )
     parser.add_argument("--host", default="0.0.0.0", help="Host to bind the server to")
-    parser.add_argument("--port", type=int, default=8000, help="Port to bind the server to")
+    parser.add_argument(
+        "--port", type=int, default=8000, help="Port to bind the server to"
+    )
+    parser.add_argument(
+        "--db-path",
+        type=str,
+        default="./rag_milvus.db",
+        help="Path to the Milvus database file (default: ./rag_milvus.db)",
+    )
 
     return parser.parse_args()
 
@@ -97,6 +111,7 @@ def cleanup_cuda_memory():
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
         torch.cuda.ipc_collect()
+
 
 def generate_response(question):
     """Generate a response to a given question using the model and Milvus database."""
@@ -120,9 +135,9 @@ def generate_response(question):
         output = tokenizer.batch_decode(output)
 
         response = clean_assistant_response(output[0])
-        
+
         cleanup_cuda_memory()
-        
+
         return response
     except Exception as e:
         cleanup_cuda_memory()
@@ -150,8 +165,10 @@ def setup_collection():
 def get_system_info():
     """Get system information including models and database stats."""
     collection_name = get_collection_name()
-    collection_num_of_records = milvus_client.get_collection_stats(collection_name)['row_count']
-    
+    collection_num_of_records = milvus_client.get_collection_stats(collection_name)[
+        "row_count"
+    ]
+
     info = {
         "LLM Model": LLM_MODEL_NAME,
         "Embedding Model": EMBEDDING_MODEL_NAME,
@@ -160,6 +177,7 @@ def get_system_info():
         "Number of Records": collection_num_of_records,
     }
     return info
+
 
 @app.post("/ask")
 async def ask_question(question: Question):
@@ -173,20 +191,25 @@ async def ask_question(question: Question):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.post("/read")
 async def read_source(read_request: ReadSource):
     try:
         load_source_and_insert_data(
-            read_request.source,
-            read_request.chunk_size,
-            read_request.chunk_overlap
+            read_request.source, read_request.chunk_size, read_request.chunk_overlap
         )
         return {"message": f"Successfully loaded content from {read_request.source}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 def main():
     args = parse_args()
+
+    # Initialize Milvus client with the path from args
+    global milvus_client
+    milvus_client = get_milvus_client(args.db_path)
+
     setup_collection()
 
     if args.source:
@@ -194,6 +217,7 @@ def main():
 
     # Run the FastAPI server
     uvicorn.run(app, host=args.host, port=args.port)
+
 
 if __name__ == "__main__":
     main()

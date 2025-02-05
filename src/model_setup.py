@@ -27,7 +27,9 @@ def get_llm_model(model_path="ibm-granite/granite-3.1-2b-instruct", device=None)
     return tokenizer, model
 
 
-def get_embedding_model(model_name="ibm-granite/granite-embedding-30m-english", device=None):
+def get_embedding_model(
+    model_name="ibm-granite/granite-embedding-30m-english", device=None
+):
     """Initialize and return a sentence transformer model for embeddings.
 
     Args:
