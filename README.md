@@ -27,6 +27,8 @@ A powerful and secure document interaction system that transforms any document i
   - PDF documents
   - HTML pages
   - Markdown files
+- Flexible model selection to balance performance and resource usage
+- Configurable AI models to match your hardware capabilities
 
 ## Prerequisites
 
@@ -75,9 +77,14 @@ Arguments:
 
 ## Local AI models
 
-The system uses the following model configurations:
+The system uses the following model configurations by default:
 - LLM Model: `ibm-granite/granite-3.1-2b-instruct`
 - Embedding Model: `ibm-granite/granite-embedding-30m-english`
+
+You can configure different models based on your needs:
+- Smaller models for faster responses and lower resource usage
+- Larger models for higher quality responses when compute resources are available
+- Balance between model size and performance based on your hardware capabilities
 
 ## License
 
