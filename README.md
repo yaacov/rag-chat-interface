@@ -4,6 +4,13 @@
 
 A powerful and secure document interaction system that transforms any document into an interactive knowledge base. Using advanced AI models that run entirely on-premises, DocuChat allows you to have natural conversations with your documents while maintaining complete data privacy and security.
 
+## Security & Privacy
+
+- **Complete Data Isolation**: All documents and conversations stay within your network
+- **On-Premises Processing**: AI models run locally, ensuring no data leaves your secure environment
+- **Local Vector Storage**: Document embeddings are stored in your local Milvus instance
+- **Network Control**: No external API dependencies for core functionality
+
 ## Demo
 
 ![Demo GIF](static/rag.gif)
@@ -16,18 +23,15 @@ A powerful and secure document interaction system that transforms any document i
 - Self-contained AI models running locally
 - Interactive web interface for document Q&A
 - Support for loading content from local files and URLs
+- Support for multiple document formats:
+  - PDF documents
+  - HTML pages
+  - Markdown files
 
 ## Prerequisites
 
 - Python 3.8+
 - GPU (recommended) or CPU for model inference
-
-## Security & Privacy
-
-- **Complete Data Isolation**: All documents and conversations stay within your network
-- **On-Premises Processing**: AI models run locally, ensuring no data leaves your secure environment
-- **Local Vector Storage**: Document embeddings are stored in your local Milvus instance
-- **Network Control**: No external API dependencies for core functionality
 
 ## Installation
 
@@ -69,7 +73,7 @@ Arguments:
 - Type `read: URL_OR_FILE` to load new content
 - Type `help` to see the help message
 
-## Environment Variables
+## Local AI models
 
 The system uses the following model configurations:
 - LLM Model: `ibm-granite/granite-3.1-2b-instruct`
