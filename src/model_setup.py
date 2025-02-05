@@ -24,16 +24,15 @@ def get_llm_model(model_path="ibm-granite/granite-3.1-2b-instruct", device=None)
 
     # Use the TRANSFORMERS_CACHE environment variable set in main.py
     tokenizer = AutoTokenizer.from_pretrained(
-        model_path,
-        local_files_only=False  # Allow downloading if not in cache
+        model_path, local_files_only=False  # Allow downloading if not in cache
     )
-    
+
     model = AutoModelForCausalLM.from_pretrained(
         model_path,
         device_map=device,
-        local_files_only=False  # Allow downloading if not in cache
+        local_files_only=False,  # Allow downloading if not in cache
     )
-    
+
     model.eval()
     return tokenizer, model
 
