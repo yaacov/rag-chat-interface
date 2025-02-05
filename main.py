@@ -31,7 +31,7 @@ HELP_TEXT = """
 """
 
 # Add after the Constants section
-SUPPORTED_EXTENSIONS = {'.txt', '.md', '.pdf', '.html', '.htm'}
+SUPPORTED_EXTENSIONS = {".txt", ".md", ".pdf", ".html", ".htm"}
 
 from src.vector_store import (
     create_milvus_collection,
@@ -152,10 +152,11 @@ def generate_response(question):
 def get_supported_files(directory):
     """Recursively get all supported files from a directory."""
     supported_files = []
-    for path in Path(directory).rglob('*'):
+    for path in Path(directory).rglob("*"):
         if path.suffix.lower() in SUPPORTED_EXTENSIONS:
             supported_files.append(str(path))
     return supported_files
+
 
 def load_source_and_insert_data(source, chunk_size=1000, chunk_overlap=200):
     """Load the source file/directory and insert data into the Milvus database."""
