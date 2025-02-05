@@ -10,7 +10,10 @@ import os
 from pathlib import Path
 
 # Constants
-LLM_MODEL_NAME = "ibm-granite/granite-3.1-2b-instruct"  # choose model size: 2b / 8b
+# Choose the model name from the following list:
+# "ibm-granite/granite-3.1-1b-a400m-instruct", "ibm-granite/granite-3.1-3b-a800m-instruct"
+# "ibm-granite/granite-3.1-2b-instruct", "ibm-granite/granite-3.1-8b-instruct"
+LLM_MODEL_NAME = "ibm-granite/granite-3.1-1b-a400m-instruct"  # choose model size: 2b / 8b
 EMBEDDING_MODEL_NAME = (
     "ibm-granite/granite-embedding-30m-english"  # choose model size: 30m /125m
 )

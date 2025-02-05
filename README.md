@@ -1,6 +1,8 @@
 # DocuChat AI
 
-> Your intelligent document companion - Load, Chat, Learn
+Your intelligent document companion - Load, Chat, Learn
+
+A self-hosted, privacy-focused RAG (Retrieval-Augmented Generation) interface for intelligent document interaction. Turn any document into a knowledge base you can chat with.
 
 A powerful and secure document interaction system that transforms any document into an interactive knowledge base. Using advanced AI models that run entirely on-premises, DocuChat allows you to have natural conversations with your documents while maintaining complete data privacy and security.
 
