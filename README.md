@@ -1,6 +1,8 @@
-# RAG Chat Interface
+# DocuChat AI
 
-A Retrieval-Augmented Generation (RAG) chat interface that allows users to load documents and ask questions about their content. The system uses language models for text generation and embeddings, with Milvus as the vector database.
+> Your intelligent document companion - Load, Chat, Learn
+
+A powerful and secure document interaction system that transforms any document into an interactive knowledge base. Using advanced AI models that run entirely on-premises, DocuChat allows you to have natural conversations with your documents while maintaining complete data privacy and security.
 
 ## Demo
 
@@ -8,16 +10,16 @@ A Retrieval-Augmented Generation (RAG) chat interface that allows users to load 
 
 ## Features
 
+- Fully on-premises deployment for maximum security and privacy
+- All documents and embeddings stored locally in your secure environment
+- No external API calls - all processing happens within your network
+- Self-contained AI models running locally
 - Interactive web interface for document Q&A
-- Support for loading content from files and URLs
-- Real-time markdown rendering of responses
-- Vector similarity search using Milvus
-- Built with FastAPI and Python
+- Support for loading content from local files and URLs
 
 ## Prerequisites
 
 - Python 3.8+
-- Milvus vector database
 - GPU (recommended) or CPU for model inference
 
 ## Installation
@@ -42,13 +44,14 @@ pip install -r requirements.txt
 
 1. Start the server:
 ```bash
-python main.py [--source INITIAL_SOURCE] [--host HOST] [--port PORT]
+python main.py [--source INITIAL_SOURCE] [--host HOST] [--port PORT] [--db-path DB_PATH]
 ```
 
 Arguments:
 - `--source`: Optional initial document to load
 - `--host`: Host to bind the server to (default: 0.0.0.0)
 - `--port`: Port to bind the server to (default: 8000)
+- `--db-path`: Path to the Milvus database file (default: ./rag_milvus.db)
 
 2. Open your browser and navigate to `http://localhost:8000`
 
@@ -64,6 +67,13 @@ Arguments:
 The system uses the following model configurations:
 - LLM Model: `ibm-granite/granite-3.1-2b-instruct`
 - Embedding Model: `ibm-granite/granite-embedding-30m-english`
+
+## Security & Privacy
+
+- **Complete Data Isolation**: All documents and conversations stay within your network
+- **On-Premises Processing**: AI models run locally, ensuring no data leaves your secure environment
+- **Local Vector Storage**: Document embeddings are stored in your local Milvus instance
+- **Network Control**: No external API dependencies for core functionality
 
 ## License
 
