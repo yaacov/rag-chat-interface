@@ -22,6 +22,13 @@ A powerful and secure document interaction system that transforms any document i
 - Python 3.8+
 - GPU (recommended) or CPU for model inference
 
+## Security & Privacy
+
+- **Complete Data Isolation**: All documents and conversations stay within your network
+- **On-Premises Processing**: AI models run locally, ensuring no data leaves your secure environment
+- **Local Vector Storage**: Document embeddings are stored in your local Milvus instance
+- **Network Control**: No external API dependencies for core functionality
+
 ## Installation
 
 1. Clone the repository:
@@ -67,13 +74,6 @@ Arguments:
 The system uses the following model configurations:
 - LLM Model: `ibm-granite/granite-3.1-2b-instruct`
 - Embedding Model: `ibm-granite/granite-embedding-30m-english`
-
-## Security & Privacy
-
-- **Complete Data Isolation**: All documents and conversations stay within your network
-- **On-Premises Processing**: AI models run locally, ensuring no data leaves your secure environment
-- **Local Vector Storage**: Document embeddings are stored in your local Milvus instance
-- **Network Control**: No external API dependencies for core functionality
 
 ## License
 
