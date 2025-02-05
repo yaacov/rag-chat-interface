@@ -107,8 +107,20 @@ def parse_args():
         default="./rag_milvus.db",
         help="Path to the Milvus database file (default: ./rag_milvus.db)",
     )
-
+    parser.add_argument(
+        "--models-cache-dir",
+        type=str,
+        default="./models_cache",
+        help="Directory to store downloaded models (default: ./models_cache)",
+    )
+    
     return parser.parse_args()
+
+def setup_model_cache(cache_dir):
+    """Setup the model cache directory."""
+    os.makedirs(cache_dir, exist_ok=True)
+    os.environ['TRANSFORMERS_CACHE'] = cache_dir
+    os.environ['SENTENCE_TRANSFORMERS_HOME'] = cache_dir
 
 
 def cleanup_cuda_memory():
@@ -228,6 +240,15 @@ async def read_source(read_request: ReadSource):
 
 def main():
     args = parse_args()
+    
+    # Setup model cache directory
+    setup_model_cache(args.models_cache_dir)
+    
+    # Initialize models
+    global device, tokenizer, model, embedding_model
+    device = get_device()
+    tokenizer, model = get_llm_model(model_path=LLM_MODEL_NAME, device=device)
+    embedding_model = get_embedding_model(model_name=EMBEDDING_MODEL_NAME, device=device)
 
     # Initialize Milvus client with the path from args
     global milvus_client

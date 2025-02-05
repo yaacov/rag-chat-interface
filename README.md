@@ -50,8 +50,8 @@ cd rag-chat-interface
 2. Install dependencies:
 ```bash
 # Optional: set a virtual env
-python3.10 -m venv myenv
-source myenv/bin/activate
+python3.10 -m venv .venv
+source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -61,14 +61,24 @@ pip install -r requirements.txt
 
 1. Start the server:
 ```bash
-python main.py [--source INITIAL_SOURCE] [--host HOST] [--port PORT] [--db-path DB_PATH]
+python main.py \
+    [--source INITIAL_SOURCE] \
+    [--host HOST] \
+    [--port PORT] \
+    [--db-path DB_PATH] \
+    [--models-cache-dir CACHE_DIR] \
+    [--chunk_size CHUNK_SIZE] \
+    [--chunk_overlap CHUNK_OVERLAP]
 ```
 
 Arguments:
-- `--source`: Optional initial document to load
+- `--source`: Optional initial document or directory to load
 - `--host`: Host to bind the server to (default: 0.0.0.0)
 - `--port`: Port to bind the server to (default: 8000)
 - `--db-path`: Path to the Milvus database file (default: ./rag_milvus.db)
+- `--models-cache-dir`: Directory to store downloaded models (default: ./models_cache)
+- `--chunk_size`: Maximum size of each document chunk (default: 1000 characters)
+- `--chunk_overlap`: Overlap between chunks (default: 200 characters)
 
 2. Open your browser and navigate to `http://localhost:8000`
 

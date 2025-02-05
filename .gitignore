@@ -46,3 +46,4 @@ volumes/
 milvus/
 rag_milvus.db
 .rag_milvus.db.lock
+models_cache/

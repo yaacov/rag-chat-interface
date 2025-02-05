@@ -1,5 +1,6 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from sentence_transformers import SentenceTransformer
+import os
 
 from src.get_device import get_device
 
@@ -21,8 +22,18 @@ def get_llm_model(model_path="ibm-granite/granite-3.1-2b-instruct", device=None)
     if device is None:
         device = get_device()
 
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
-    model = AutoModelForCausalLM.from_pretrained(model_path, device_map=device)
+    # Use the TRANSFORMERS_CACHE environment variable set in main.py
+    tokenizer = AutoTokenizer.from_pretrained(
+        model_path,
+        local_files_only=False  # Allow downloading if not in cache
+    )
+    
+    model = AutoModelForCausalLM.from_pretrained(
+        model_path,
+        device_map=device,
+        local_files_only=False  # Allow downloading if not in cache
+    )
+    
     model.eval()
     return tokenizer, model
 
@@ -44,4 +55,5 @@ def get_embedding_model(
     if device is None:
         device = get_device()
 
+    # SENTENCE_TRANSFORMERS_HOME environment variable is automatically used
     return SentenceTransformer(model_name, device=device)
