@@ -215,6 +215,14 @@
    "What are the main points in the document?"
    "Summarize the key findings"`;
 
+        // Add this before the askQuestion function
+        document.getElementById('question').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // Prevent default newline
+                askQuestion();
+            }
+        });
+
         function isReadCommand(text) {
             // Check if text starts with read: or load: (case insensitive)
             const isCommand = /^(read:|load:)/i.test(text.trim());
