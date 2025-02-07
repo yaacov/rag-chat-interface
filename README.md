@@ -16,7 +16,7 @@ A powerful and secure document interaction system that transforms any document i
 ## Local AI models
 
 The system uses the following model configurations by default:
-- **LLM Model**: `ibm-granite/granite-3.1-2b-instruct`
+- **LLM Model**: `ibm-granite/granite-3.1-1b-a400m-instruct`
 - **Embedding Model**: `ibm-granite/granite-embedding-30m-english`
 
 You can configure different models based on your needs:
