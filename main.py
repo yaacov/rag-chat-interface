@@ -18,7 +18,6 @@ EMBEDDING_MODEL_NAME = (
     "ibm-granite/granite-embedding-30m-english"  # choose model size: 30m /125m
 )
 
-# Add after the constants section
 HELP_TEXT = """
 ### Commands:
 - Ask any question about the loaded documents
@@ -33,7 +32,6 @@ HELP_TEXT = """
 - "help"
 """
 
-# Add after the Constants section
 SUPPORTED_EXTENSIONS = {".txt", ".md", ".pdf", ".html", ".htm"}
 
 from src.vector_store import (
@@ -64,7 +62,6 @@ class ReadSource(BaseModel):
 # Create FastAPI app
 app = FastAPI()
 
-# Add this after creating the FastAPI app
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
