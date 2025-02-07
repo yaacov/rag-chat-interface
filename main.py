@@ -13,7 +13,7 @@ from pathlib import Path
 # Choose the model name from the following list:
 # "ibm-granite/granite-3.1-1b-a400m-instruct", "ibm-granite/granite-3.1-3b-a800m-instruct"
 # "ibm-granite/granite-3.1-2b-instruct", "ibm-granite/granite-3.1-8b-instruct"
-LLM_MODEL_NAME = "ibm-granite/granite-3.1-1b-a400m-instruct"  # choose model size: 2b / 8b
+LLM_MODEL_NAME = "ibm-granite/granite-3.1-1b-a400m-instruct"
 EMBEDDING_MODEL_NAME = (
     "ibm-granite/granite-embedding-30m-english"  # choose model size: 30m /125m
 )
@@ -116,6 +116,12 @@ def parse_args():
         default="./models_cache",
         help="Directory to store downloaded models (default: ./models_cache)",
     )
+    parser.add_argument(
+        "--downloads-dir",
+        type=str,
+        default="./downloads",
+        help="Directory to store downloaded files (default: ./downloads)",
+    )
 
     return parser.parse_args()
 
@@ -174,19 +180,25 @@ def get_supported_files(directory):
     return supported_files
 
 
-def load_source_and_insert_data(source, chunk_size=1000, chunk_overlap=200):
+def load_source_and_insert_data(
+    source, chunk_size=1000, chunk_overlap=200, downloads_dir=None
+):
     """Load the source file/directory and insert data into the Milvus database."""
     if os.path.isdir(source):
         files = get_supported_files(source)
         if not files:
             raise ValueError(f"No supported files found in directory {source}")
         for file_path in files:
-            chunks = load_and_split(file_path, chunk_size, chunk_overlap)
+            chunks = load_and_split(
+                file_path, chunk_size, chunk_overlap, downloads_dir=downloads_dir
+            )
             text_lines = [chunk.page_content for chunk in chunks]
             data = embed_data(embedding_model, text_lines)
             insert_data_in_db(milvus_client, data)
     else:
-        chunks = load_and_split(source, chunk_size, chunk_overlap)
+        chunks = load_and_split(
+            source, chunk_size, chunk_overlap, downloads_dir=downloads_dir
+        )
         text_lines = [chunk.page_content for chunk in chunks]
         data = embed_data(embedding_model, text_lines)
         insert_data_in_db(milvus_client, data)
@@ -234,8 +246,12 @@ async def ask_question(question: Question):
 @app.post("/read")
 async def read_source(read_request: ReadSource):
     try:
+        args = parse_args()
         load_source_and_insert_data(
-            read_request.source, read_request.chunk_size, read_request.chunk_overlap
+            read_request.source,
+            read_request.chunk_size,
+            read_request.chunk_overlap,
+            args.downloads_dir,
         )
         return {"message": f"Successfully loaded content from {read_request.source}"}
     except Exception as e:
@@ -263,7 +279,11 @@ def main():
     setup_collection()
 
     if args.source:
-        load_source_and_insert_data(args.source, args.chunk_size, args.chunk_overlap)
+        # Create downloads directory if it doesn't exist
+        os.makedirs(args.downloads_dir, exist_ok=True)
+        load_source_and_insert_data(
+            args.source, args.chunk_size, args.chunk_overlap, args.downloads_dir
+        )
 
     # Run the FastAPI server
     uvicorn.run(app, host=args.host, port=args.port)

@@ -16,8 +16,8 @@ A powerful and secure document interaction system that transforms any document i
 ## Local AI models
 
 The system uses the following model configurations by default:
-- LLM Model: `ibm-granite/granite-3.1-2b-instruct`
-- Embedding Model: `ibm-granite/granite-embedding-30m-english`
+- **LLM Model**: `ibm-granite/granite-3.1-2b-instruct`
+- **Embedding Model**: `ibm-granite/granite-embedding-30m-english`
 
 You can configure different models based on your needs:
 - Smaller models for faster responses and lower resource usage
@@ -80,6 +80,7 @@ python main.py \
     [--port PORT] \
     [--db-path DB_PATH] \
     [--models-cache-dir CACHE_DIR] \
+    [--downloads-dir DOWNLOADS_DIR] \
     [--chunk_size CHUNK_SIZE] \
     [--chunk_overlap CHUNK_OVERLAP]
 ```
@@ -90,6 +91,7 @@ Arguments:
 - `--port`: Port to bind the server to (default: 8000)
 - `--db-path`: Path to the Milvus database file (default: ./rag_milvus.db)
 - `--models-cache-dir`: Directory to store downloaded models (default: ./models_cache)
+- `--downloads-dir`: Directory to store downloaded files (default: ./downloads)
 - `--chunk_size`: Maximum size of each document chunk (default: 1000 characters)
 - `--chunk_overlap`: Overlap between chunks (default: 200 characters)
 

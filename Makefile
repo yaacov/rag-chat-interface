@@ -1,4 +1,4 @@
-.PHONY: format lint clean clean-all clean-models install run venv
+.PHONY: format lint clean clean-all clean-models clean-db install run venv
 
 # Default paths and commands
 PYTHON = python3.10
@@ -31,7 +31,10 @@ clean:
 clean-models:
 	rm -rf models_cache
 
-clean-all: clean clean-models
+clean-db:
+	rm -f rag_milvus.db .rag_milvus.db.lock
+
+clean-all: clean clean-models clean-db
 	rm -rf $(VENV)
 
 run:
@@ -45,6 +48,7 @@ help:
 	@echo "  format      - Format code using black"
 	@echo "  lint        - Check code formatting using black"
 	@echo "  clean       - Remove Python cache files"
+	@echo "  clean-db    - Remove Milvus DB files"
 	@echo "  clean-models- Remove downloaded model cache"
-	@echo "  clean-all   - Remove Python cache files, model cache, and venv"
+	@echo "  clean-all   - Remove Python cache files, model cache, DB files, and venv"
 	@echo "  run         - Run the main application"
