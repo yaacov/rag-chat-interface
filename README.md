@@ -95,14 +95,6 @@ Arguments:
 
 2. Open your browser and navigate to `http://localhost:8000`
 
-## Web Interface Commands
-
-- Ask any question about loaded documents
-- Type `dump` to see system information
-- Type `read: URL_OR_FILE` to load new content
-- Type `read: /path/to/directory` to load all supported files from a directory
-- Type `help` to see the help message
-
 ## License
 
 MIT License
