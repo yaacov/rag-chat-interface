@@ -170,7 +170,7 @@ def generate_response(query):
     """Generate a response to a given question using the model and Milvus database."""
     start_time = time.time()
     try:
-        search_res = search_milvus_db(milvus_client, embedding_model, query)
+        search_res = search_milvus_db(milvus_client, embedding_model, query, limit=5)
         retrieved_lines_with_distances = []
         sources = []
 
@@ -179,9 +179,9 @@ def generate_response(query):
             distance = res["distance"]
             source_url = res["entity"].get("source_url", None)
             retrieved_lines_with_distances.append((text, distance, source_url))
-            # Add source to sources list if not already there
-            if source_url and source_url not in sources:
-                sources.append(source_url)
+            # Add source to sources list as an object with url and text
+            if source_url:
+                sources.append({"url": source_url, "text": text})
 
         augmented_query = generate_prompt(retrieved_lines_with_distances, query)
 

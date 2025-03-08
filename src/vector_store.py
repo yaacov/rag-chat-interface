@@ -102,13 +102,15 @@ def create_milvus_collection(
 
 
 def search_milvus_db(
-    milvus_client, embedding_model, question, collection_name=collection_name
+    milvus_client, embedding_model, question, limit=3, collection_name=collection_name
 ):
     """Search for similar texts in the Milvus database using a question.
 
     Args:
         milvus_client: A connected Milvus client instance
         question (str): The query text to search for
+        limit (int, optional): Maximum number of results to return.
+            Defaults to 3.
         collection_name (str, optional): Name of the collection to search in.
             Defaults to global collection_name.
 
@@ -120,7 +122,7 @@ def search_milvus_db(
     search_res = milvus_client.search(
         collection_name=collection_name,
         data=[emb_text(embedding_model, question)],
-        limit=5,
+        limit=limit,
         search_params={"metric_type": "IP", "params": {}},
         output_fields=["text", "source_url"],
     )

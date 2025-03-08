@@ -183,7 +183,7 @@
         }
         #sources-list li {
             color: #777;
-            font-size: 0.8em;
+            font-size: 1em;
             margin-bottom: 5px;
             padding-left: 16px;
             position: relative;
@@ -200,6 +200,20 @@
         }
         #sources-list a:hover {
             text-decoration: underline;
+        }
+        .source-text-snippet {
+            color: #aaa;
+            font-size: 1em;
+            margin-top: 4px;
+            font-style: italic;
+            padding: 8px 12px;
+            background-color: #333;
+            border-radius: 6px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-line;
+            line-height: 1.4;
+            border-left: 3px solid #555;
         }
     </style>
 </head>
@@ -304,16 +318,27 @@
                 sources.forEach(source => {
                     const listItem = document.createElement('li');
                     
-                    // Check if source is a URL
+                    // Create source content with URL as link and text preview
                     const urlPattern = /^(https?:\/\/)/i;
-                    if (urlPattern.test(source)) {
+                    if (source.url && urlPattern.test(source.url)) {
                         const link = document.createElement('a');
-                        link.href = source;
+                        link.href = source.url;
                         link.target = '_blank';
-                        link.textContent = source;
+                        link.textContent = source.url;
                         listItem.appendChild(link);
-                    } else {
-                        listItem.textContent = source;
+                    } else if (source.url) {
+                        // For non-URL sources like file paths
+                        const sourceLabel = document.createElement('span');
+                        sourceLabel.textContent = source.url;
+                        listItem.appendChild(sourceLabel);
+                    }
+                    
+                    // Add text snippet if available
+                    if (source.text) {
+                        const textSnippet = document.createElement('div');
+                        textSnippet.textContent = `... ${source.text} ...`;
+                        textSnippet.className = 'source-text-snippet';
+                        listItem.appendChild(textSnippet);
                     }
                     
                     sourcesList.appendChild(listItem);
