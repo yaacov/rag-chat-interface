@@ -1,4 +1,4 @@
-# DocuChat AI
+# RAG chat interface
 
 A self-hosted, privacy-focused RAG (Retrieval-Augmented Generation) interface for intelligent document interaction. Turn any document into a knowledge base you can chat with.
 
