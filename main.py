@@ -11,9 +11,8 @@ from pathlib import Path
 
 # Constants
 # Choose the model name from the following list:
-# "ibm-granite/granite-3.1-1b-a400m-instruct", "ibm-granite/granite-3.1-3b-a800m-instruct"
-# "ibm-granite/granite-3.1-2b-instruct", "ibm-granite/granite-3.1-8b-instruct"
-LLM_MODEL_NAME = "ibm-granite/granite-3.1-1b-a400m-instruct"
+# "ibm-granite/granite-3.2-2b-instruct", "ibm-granite/granite-3.2-8b-instruct"
+LLM_MODEL_NAME = "ibm-granite/granite-3.2-2b-instruct"
 EMBEDDING_MODEL_NAME = (
     "ibm-granite/granite-embedding-30m-english"  # choose model size: 30m /125m
 )
@@ -71,9 +70,12 @@ async def read_root():
         return f.read()
 
 
-device = get_device()
-tokenizer, model = get_llm_model(model_path=LLM_MODEL_NAME, device=device)
-embedding_model = get_embedding_model(model_name=EMBEDDING_MODEL_NAME, device=device)
+# Globals
+device = None
+tokenizer = None
+model = None
+embedding_model = None
+milvus_client = None
 
 
 def parse_args():
