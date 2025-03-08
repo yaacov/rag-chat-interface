@@ -201,15 +201,14 @@
 - The AI will respond based on the loaded documents
 
 ## Commands
-- To load a document, use: \`read: URL_OR_PATH\`
-- Or simply paste a URL directly
+- To load a document, use: \`URL_OR_PATH\`
+- Or mutliple URLs on separate lines (use shift+enter to add a new line)
 - Use \`help\` to see this help message
 - Use \`dump\` to see system information
 
 ## Examples
 1. Load a document:
-   \`read: https://example.com/doc.pdf\`
-   \`read: /path/to/local/file.txt\`
+   \`https://example.com/doc.pdf\`
 
 2. Ask questions:
    "What are the main points in the document?"
@@ -224,22 +223,31 @@
         });
 
         function isReadCommand(text) {
-            // Check if text starts with read: or load: (case insensitive)
-            const isCommand = /^(read:|load:)/i.test(text.trim());
-            
-            // Check if text looks like a URL
+            // URL pattern to check if text looks like a URL
             const urlPattern = /^(https?:\/\/)?[\w-]+(\.[\w-]+)+[/#?]?.*$/i;
-            const isUrl = urlPattern.test(text.trim());
             
-            // Extract the source URL/path
-            let source = text.trim();
-            if (isCommand) {
-                source = text.substring(text.indexOf(':') + 1).trim();
+            // Split the text into lines and remove empty or whitespace-only lines
+            const lines = text.split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+
+            // Check for multi-line URLs
+            if (lines.length > 0) {
+                // Check if all lines are URLs
+                const allLinesAreUrls = lines.every(line => urlPattern.test(line));
+
+                if (allLinesAreUrls) {
+                    return {
+                        isReadCommand: true,
+                        source: lines
+                    };
+                }
             }
             
+            // Return the original text if it's not a URL
             return {
-                isReadCommand: isCommand || isUrl,
-                source: source
+                isReadCommand: false,
+                source: text
             };
         }
 
@@ -260,6 +268,8 @@
             try {
                 const readCommand = isReadCommand(question);
                 if (readCommand.isReadCommand) {
+                    console.log('Loading document:', readCommand.source);
+
                     const response = await fetch('/read', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},

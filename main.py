@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Union, List
 import uvicorn
 import torch
 import os
@@ -53,7 +53,7 @@ class Question(BaseModel):
 
 
 class ReadSource(BaseModel):
-    source: str
+    source: Union[str, List[str]]
     chunk_size: Optional[int] = 1000
     chunk_overlap: Optional[int] = 200
 
@@ -246,13 +246,29 @@ async def ask_question(question: Question):
 async def read_source(read_request: ReadSource):
     try:
         args = parse_args()
-        load_source_and_insert_data(
-            read_request.source,
-            read_request.chunk_size,
-            read_request.chunk_overlap,
-            args.downloads_dir,
-        )
-        return {"message": f"Successfully loaded content from {read_request.source}"}
+        if isinstance(read_request.source, list):
+            # Process list of sources
+            for source in read_request.source:
+                load_source_and_insert_data(
+                    source,
+                    read_request.chunk_size,
+                    read_request.chunk_overlap,
+                    args.downloads_dir,
+                )
+            return {
+                "message": f"Successfully loaded content from {len(read_request.source)} sources"
+            }
+        else:
+            # Process single source
+            load_source_and_insert_data(
+                read_request.source,
+                read_request.chunk_size,
+                read_request.chunk_overlap,
+                args.downloads_dir,
+            )
+            return {
+                "message": f"Successfully loaded content from {read_request.source}"
+            }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
