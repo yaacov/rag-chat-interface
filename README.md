@@ -82,7 +82,9 @@ pip install -r requirements.txt
     [--chunk_size CHUNK_SIZE] \
     [--chunk_overlap CHUNK_OVERLAP] \
     [--device GPU_DEVICE] \
-    [--llm-model LLM_MODEL_NAME]
+    [--llm-model LLM_MODEL_NAME] \
+    [--query-log-db QUERY_LOG_DB] \
+    [--log-queries]
 ```
 
 Example:
@@ -92,7 +94,7 @@ Example:
 ```
 
 Arguments:
-- `--source`: Optional initial document or directory to load
+- `--source`: Initial source to load - can be a file, directory, or URL (optional)
 - `--host`: Host to bind the server to (default: 0.0.0.0)
 - `--port`: Port to bind the server to (default: 8000)
 - `--db-path`: Path to the Milvus database file (default: ./rag_milvus.db)
@@ -100,8 +102,10 @@ Arguments:
 - `--downloads-dir`: Directory to store downloaded files (default: ./downloads)
 - `--chunk_size`: Maximum size of each document chunk (default: 1000 characters)
 - `--chunk_overlap`: Overlap between chunks (default: 200 characters)
-- `--device`: Override GPU device used (default: use system GPU)
-- `--llm-model`: Override default LLM model (default: ibm-granite/granite-3.2-2b-instruct)
+- `--device`: Force a specific device (e.g., 'cuda', 'cpu', 'mps'). If not provided, best available device is automatically selected
+- `--llm-model`: Override the default LLM model (default: ibm-granite/granite-3.2-2b-instruct)
+- `--query-log-db`: Path to SQLite database for query logging (default: ./query_logs.db)
+- `--log-queries`: Enable logging of queries and responses to SQLite database
 
 2. Open your browser and navigate to `http://localhost:8000`
 
