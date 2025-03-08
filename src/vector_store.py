@@ -39,7 +39,7 @@ def emb_text(embedding_model, text):
     return embedding_model.encode([text], normalize_embeddings=True).tolist()[0]
 
 
-def embed_data(embedding_model, text_lines):
+def embed_data(embedding_model, text_lines, source_urls=None):
     """Create embeddings for a collection of text lines.
 
     This function processes multiple text lines in parallel, showing progress
@@ -47,17 +47,24 @@ def embed_data(embedding_model, text_lines):
     and stored with metadata.
 
     Args:
+        embedding_model: Model used for creating embeddings
         text_lines (list): List of text strings to be converted to embeddings
+        source_urls (list, optional): List of source URLs corresponding to each text line.
+            If provided, must be the same length as text_lines.
 
     Returns:
         list: List of dictionaries, each containing:
             - id (int): Sequential identifier
             - vector (list): The embedding vector
             - text (str): Original text content
+            - source_url (str, optional): Source URL if provided
     """
     data = []
     for i, line in enumerate(tqdm(text_lines, desc="Creating embeddings")):
-        data.append({"id": i, "vector": emb_text(embedding_model, line), "text": line})
+        entry = {"id": i, "vector": emb_text(embedding_model, line), "text": line}
+        if source_urls and i < len(source_urls):
+            entry["source_url"] = source_urls[i]
+        data.append(entry)
     return data
 
 
@@ -108,14 +115,14 @@ def search_milvus_db(
     Returns:
         list: Search results containing similar texts and their metadata.
             Each result includes similarity scores and output fields specified
-            in the search parameters.
+            in the search parameters, including source_url if available.
     """
     search_res = milvus_client.search(
         collection_name=collection_name,
         data=[emb_text(embedding_model, question)],
         limit=5,
         search_params={"metric_type": "IP", "params": {}},
-        output_fields=["text"],
+        output_fields=["text", "source_url"],
     )
 
     return search_res

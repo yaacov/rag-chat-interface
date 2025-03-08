@@ -155,9 +155,17 @@ def generate_response(question):
     """Generate a response to a given question using the model and Milvus database."""
     try:
         search_res = search_milvus_db(milvus_client, embedding_model, question)
-        retrieved_lines_with_distances = [
-            (res["entity"]["text"], res["distance"]) for res in search_res[0]
-        ]
+        retrieved_lines_with_distances = []
+        sources = []
+
+        for res in search_res[0]:
+            text = res["entity"]["text"]
+            distance = res["distance"]
+            source_url = res["entity"].get("source_url", None)
+            retrieved_lines_with_distances.append((text, distance, source_url))
+            # Add source to sources list if not already there
+            if source_url and source_url not in sources:
+                sources.append(source_url)
 
         content = generate_prompt(retrieved_lines_with_distances, question)
 
@@ -176,7 +184,7 @@ def generate_response(question):
 
         cleanup_cuda_memory()
 
-        return response
+        return response, sources
     except Exception as e:
         cleanup_cuda_memory()
         raise e
@@ -204,14 +212,16 @@ def load_source_and_insert_data(
                 file_path, chunk_size, chunk_overlap, downloads_dir=downloads_dir
             )
             text_lines = [chunk.page_content for chunk in chunks]
-            data = embed_data(embedding_model, text_lines)
+            source_urls = [file_path] * len(text_lines)
+            data = embed_data(embedding_model, text_lines, source_urls)
             insert_data_in_db(milvus_client, data)
     else:
         chunks = load_and_split(
             source, chunk_size, chunk_overlap, downloads_dir=downloads_dir
         )
         text_lines = [chunk.page_content for chunk in chunks]
-        data = embed_data(embedding_model, text_lines)
+        source_urls = [source] * len(text_lines)
+        data = embed_data(embedding_model, text_lines, source_urls)
         insert_data_in_db(milvus_client, data)
 
 
@@ -248,8 +258,9 @@ async def ask_question(question: Question):
             return get_system_info()
         if question.text.lower() == "help":
             return {"response": HELP_TEXT}
-        response = generate_response(question.text)
-        return {"response": response}
+
+        response, sources = generate_response(question.text)
+        return {"response": response, "sources": sources}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

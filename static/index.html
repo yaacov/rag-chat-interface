@@ -123,7 +123,7 @@
             padding: 2px 4px;
             border-radius: 4px;
             font-family: monospace;
-            line-height: 1.5; /* Added line height for inline code */
+            line-height: 1.5;
             color: #e0e0e0;
         }
         .markdown-content pre {
@@ -131,7 +131,7 @@
             padding: 15px;
             border-radius: 8px;
             overflow-x: auto;
-            line-height: 1.5; /* Added line height for code blocks */
+            line-height: 1.5;
             color: #e0e0e0;
         }
         .markdown-content ul, .markdown-content ol {
@@ -169,6 +169,38 @@
             text-align: left;
             padding: 0;
         }
+        #sources-container {
+            margin-top: 10px;
+            padding: 15px 20px;
+            background-color: #2a2a2a;
+            border-radius: 12px;
+            display: none;
+        }
+        #sources-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        #sources-list li {
+            color: #777;
+            font-size: 0.8em;
+            margin-bottom: 5px;
+            padding-left: 16px;
+            position: relative;
+        }
+        #sources-list li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #555;
+        }
+        #sources-list a {
+            color: #6d9eeb;
+            text-decoration: none;
+        }
+        #sources-list a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -187,6 +219,9 @@
     </div>
     <div id="loading" class="loading">Thinking</div>
     <div id="response"></div>
+    <div id="sources-container">
+        <ul id="sources-list"></ul>
+    </div>
 
     <footer>
         <a href="https://github.com/yaacov/rag-chat-interface" class="github-link" target="_blank">
@@ -251,6 +286,44 @@
             };
         }
 
+        function clearSourcesList() {
+            const sourcesContainer = document.getElementById('sources-container');
+            const sourcesList = document.getElementById('sources-list');
+            sourcesList.innerHTML = '';
+            sourcesContainer.style.display = 'none';
+        }
+
+        function displaySources(sources) {
+            const sourcesContainer = document.getElementById('sources-container');
+            const sourcesList = document.getElementById('sources-list');
+            
+            // Clear previous sources
+            sourcesList.innerHTML = '';
+            
+            if (sources && sources.length > 0) {
+                sources.forEach(source => {
+                    const listItem = document.createElement('li');
+                    
+                    // Check if source is a URL
+                    const urlPattern = /^(https?:\/\/)/i;
+                    if (urlPattern.test(source)) {
+                        const link = document.createElement('a');
+                        link.href = source;
+                        link.target = '_blank';
+                        link.textContent = source;
+                        listItem.appendChild(link);
+                    } else {
+                        listItem.textContent = source;
+                    }
+                    
+                    sourcesList.appendChild(listItem);
+                });
+                sourcesContainer.style.display = 'block';
+            } else {
+                sourcesContainer.style.display = 'none';
+            }
+        }
+
         async function askQuestion() {
             const question = document.getElementById('question').value;
             const loadingDiv = document.getElementById('loading');
@@ -264,6 +337,7 @@
             helpButton.disabled = true;
             infoButton.disabled = true;
             responseDiv.innerHTML = '';
+            clearSourcesList();
             
             try {
                 const readCommand = isReadCommand(question);
@@ -286,6 +360,10 @@
                     const data = await response.json();
                     const parsedMarkdown = marked.parse(data.response);
                     responseDiv.innerHTML = `<div class="markdown-content">${parsedMarkdown}</div>`;
+                     
+                    if (data.sources) {
+                        displaySources(data.sources);
+                    }
                 }
             } catch (error) {
                 responseDiv.innerHTML = `<p style="color: red;"><strong>Error:</strong> ${error.message}</p>`;
@@ -310,6 +388,7 @@
             try {
                 const parsedMarkdown = marked.parse(HELP_TEXT);
                 responseDiv.innerHTML = `<div class="markdown-content">${parsedMarkdown}</div>`;
+                clearSourcesList();
             } catch (error) {
                 responseDiv.innerHTML = `<p style="color: red;"><strong>Error:</strong> ${error.message}</p>`;
             } finally {
@@ -344,6 +423,7 @@
                 }
                 infoHtml += '</ul>';
                 responseDiv.innerHTML = infoHtml;
+                clearSourcesList();
             } catch (error) {
                 responseDiv.innerHTML = `<p style="color: red;"><strong>Error:</strong> ${error.message}</p>`;
             } finally {
