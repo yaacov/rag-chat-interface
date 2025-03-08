@@ -127,6 +127,12 @@ def parse_args():
         default=None,
         help="Force a specific device (e.g., 'cuda', 'cpu', 'mps'). If not provided, best available device is automatically selected.",
     )
+    parser.add_argument(
+        "--llm-model",
+        type=str,
+        default=None,
+        help=f"Override the default LLM model (default: {LLM_MODEL_NAME})",
+    )
 
     return parser.parse_args()
 
@@ -288,7 +294,11 @@ def main():
     # Initialize models
     global device, tokenizer, model, embedding_model
     device = args.device if args.device else get_device()
-    tokenizer, model = get_llm_model(model_path=LLM_MODEL_NAME, device=device)
+
+    # Use custom LLM model if provided
+    llm_model_name = args.llm_model if args.llm_model else LLM_MODEL_NAME
+    tokenizer, model = get_llm_model(model_path=llm_model_name, device=device)
+
     embedding_model = get_embedding_model(
         model_name=EMBEDDING_MODEL_NAME, device=device
     )

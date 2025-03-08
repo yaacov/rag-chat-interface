@@ -72,7 +72,7 @@ pip install -r requirements.txt
 
 1. Start the server:
 ```bash
-python main.py \
+.venv/bin/python main.py \
     [--source INITIAL_SOURCE] \
     [--host HOST] \
     [--port PORT] \
@@ -80,8 +80,15 @@ python main.py \
     [--models-cache-dir CACHE_DIR] \
     [--downloads-dir DOWNLOADS_DIR] \
     [--chunk_size CHUNK_SIZE] \
-    [--chunk_overlap CHUNK_OVERLAP]
-    [--device GPU_DEVICE]
+    [--chunk_overlap CHUNK_OVERLAP] \
+    [--device GPU_DEVICE] \
+    [--llm-model LLM_MODEL_NAME]
+```
+
+Example:
+```bash
+# Override LLM model and GPU device
+.venv/bin/python main.py --llm-model ibm-granite/granite-3.2-8b-instruct --device cpu
 ```
 
 Arguments:
@@ -94,6 +101,7 @@ Arguments:
 - `--chunk_size`: Maximum size of each document chunk (default: 1000 characters)
 - `--chunk_overlap`: Overlap between chunks (default: 200 characters)
 - `--device`: Override GPU device used (default: use system GPU)
+- `--llm-model`: Override default LLM model (default: ibm-granite/granite-3.2-2b-instruct)
 
 2. Open your browser and navigate to `http://localhost:8000`
 
