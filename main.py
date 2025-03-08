@@ -8,6 +8,7 @@ import uvicorn
 import torch
 import os
 from pathlib import Path
+import time
 
 # Constants
 # Choose the model name from the following list:
@@ -45,6 +46,7 @@ from src.load_and_split import load_and_split
 from src.model_setup import get_llm_model, get_embedding_model
 from src.milvus_setup import get_milvus_client
 from src.prompt_utils import generate_prompt, clean_assistant_response
+from src.query_logging import setup_sqlite_db, log_query, get_query_history
 
 
 # Define API models
@@ -76,6 +78,8 @@ tokenizer = None
 model = None
 embedding_model = None
 milvus_client = None
+sqlite_conn = None
+args = None
 
 
 def parse_args():
@@ -133,6 +137,17 @@ def parse_args():
         default=None,
         help=f"Override the default LLM model (default: {LLM_MODEL_NAME})",
     )
+    parser.add_argument(
+        "--query-log-db",
+        type=str,
+        default="./query_logs.db",
+        help="Path to SQLite database for query logging (default: ./query_logs.db)",
+    )
+    parser.add_argument(
+        "--log-queries",
+        action="store_true",
+        help="Enable logging of queries and responses to SQLite database",
+    )
 
     return parser.parse_args()
 
@@ -151,10 +166,11 @@ def cleanup_cuda_memory():
         torch.cuda.ipc_collect()
 
 
-def generate_response(question):
+def generate_response(query):
     """Generate a response to a given question using the model and Milvus database."""
+    start_time = time.time()
     try:
-        search_res = search_milvus_db(milvus_client, embedding_model, question)
+        search_res = search_milvus_db(milvus_client, embedding_model, query)
         retrieved_lines_with_distances = []
         sources = []
 
@@ -167,10 +183,10 @@ def generate_response(question):
             if source_url and source_url not in sources:
                 sources.append(source_url)
 
-        content = generate_prompt(retrieved_lines_with_distances, question)
+        augmented_query = generate_prompt(retrieved_lines_with_distances, query)
 
         chat_data = [
-            {"role": "user", "content": content},
+            {"role": "user", "content": augmented_query},
         ]
         chat = tokenizer.apply_chat_template(
             chat_data, tokenize=False, add_generation_prompt=True
@@ -181,6 +197,18 @@ def generate_response(question):
         output = tokenizer.batch_decode(output)
 
         response = clean_assistant_response(output[0])
+        execution_time_ms = int((time.time() - start_time) * 1000)
+
+        # Log the query and response if logging is enabled
+        if args.log_queries and sqlite_conn is not None:
+            log_query(
+                sqlite_conn,
+                query,
+                augmented_query,
+                response,
+                sources,
+                execution_time_ms,
+            )
 
         cleanup_cuda_memory()
 
@@ -296,14 +324,27 @@ async def read_source(read_request: ReadSource):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/query_history")
+async def get_query_history_endpoint(limit: int = 10, offset: int = 0):
+    """Retrieve query history from SQLite database."""
+    if not args.log_queries or sqlite_conn is None:
+        raise HTTPException(status_code=400, detail="Query logging is not enabled")
+
+    try:
+        history = get_query_history(sqlite_conn, limit, offset)
+        return {"history": history}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 def main():
+    global args, device, tokenizer, model, embedding_model, milvus_client, sqlite_conn
     args = parse_args()
 
     # Setup model cache directory
     setup_model_cache(args.models_cache_dir)
 
     # Initialize models
-    global device, tokenizer, model, embedding_model
     device = args.device if args.device else get_device()
 
     # Use custom LLM model if provided
@@ -315,8 +356,11 @@ def main():
     )
 
     # Initialize Milvus client with the path from args
-    global milvus_client
     milvus_client = get_milvus_client(args.db_path)
+
+    # Initialize SQLite connection if query logging is enabled
+    if args.log_queries:
+        sqlite_conn = setup_sqlite_db(args.query_log_db)
 
     setup_collection()
 
