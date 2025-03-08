@@ -121,6 +121,12 @@ def parse_args():
         default="./downloads",
         help="Directory to store downloaded files (default: ./downloads)",
     )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default=None,
+        help="Force a specific device (e.g., 'cuda', 'cpu', 'mps'). If not provided, best available device is automatically selected.",
+    )
 
     return parser.parse_args()
 
@@ -281,7 +287,7 @@ def main():
 
     # Initialize models
     global device, tokenizer, model, embedding_model
-    device = get_device()
+    device = args.device if args.device else get_device()
     tokenizer, model = get_llm_model(model_path=LLM_MODEL_NAME, device=device)
     embedding_model = get_embedding_model(
         model_name=EMBEDDING_MODEL_NAME, device=device

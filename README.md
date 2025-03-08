@@ -14,7 +14,7 @@ A powerful and secure document interaction system that transforms any document i
 ## Local AI models
 
 The system uses the following model configurations by default:
-- **LLM Model**: `ibm-granite/granite-3.1-1b-a400m-instruct`
+- **LLM Model**: `ibm-granite/granite-3.2-2b-instruct`
 - **Embedding Model**: `ibm-granite/granite-embedding-30m-english`
 
 You can configure different models based on your needs:
@@ -81,6 +81,7 @@ python main.py \
     [--downloads-dir DOWNLOADS_DIR] \
     [--chunk_size CHUNK_SIZE] \
     [--chunk_overlap CHUNK_OVERLAP]
+    [--device GPU_DEVICE]
 ```
 
 Arguments:
@@ -92,6 +93,7 @@ Arguments:
 - `--downloads-dir`: Directory to store downloaded files (default: ./downloads)
 - `--chunk_size`: Maximum size of each document chunk (default: 1000 characters)
 - `--chunk_overlap`: Overlap between chunks (default: 200 characters)
+- `--device`: Override GPU device used (default: use system GPU)
 
 2. Open your browser and navigate to `http://localhost:8000`
 
