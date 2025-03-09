@@ -297,17 +297,26 @@ async def ask_question(question: Question):
 async def read_source(read_request: ReadSource):
     try:
         args = parse_args()
+        successful_loads = 0
+        failed_loads = 0
+
         if isinstance(read_request.source, list):
             # Process list of sources
             for source in read_request.source:
-                load_source_and_insert_data(
-                    source,
-                    read_request.chunk_size,
-                    read_request.chunk_overlap,
-                    args.downloads_dir,
-                )
+                try:
+                    load_source_and_insert_data(
+                        source,
+                        read_request.chunk_size,
+                        read_request.chunk_overlap,
+                        args.downloads_dir,
+                    )
+                    successful_loads += 1
+                except Exception:
+                    failed_loads += 1
+                    continue  # Ignore errors and continue with next source
+
             return {
-                "message": f"Successfully loaded content from {len(read_request.source)} sources"
+                "message": f"Successfully loaded content from {successful_loads} sources, {failed_loads} sources failed to load"
             }
         else:
             # Process single source
