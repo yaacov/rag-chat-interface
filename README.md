@@ -109,6 +109,16 @@ Arguments:
 
 2. Open your browser and navigate to `http://localhost:8000`
 
+## Utility Crawler
+
+While RAG chat interface does not directly crawl over HTTP links, we provide a utility crawler that can extract URLs from a starting URL. This can be useful for discovering content you may want to process with the RAG system.
+
+```bash
+python utils/crawler.py https://example.com/docs/ --verbose
+```
+
+For more details about the crawler utility, see [README_crawler.md](README_crawler.md).
+
 ## License
 
 MIT License
