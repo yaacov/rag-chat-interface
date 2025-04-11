@@ -45,7 +45,7 @@ You can configure different models based on your needs:
   - Plain text files
 - Flexible model selection to balance performance and resource usage
 - Configurable AI models to match your hardware capabilities
-- Optional, Model-as-a-Service (MAAS) integration:
+- Optional, MAAS integration:
   - Connect to external LLM and embedding API services
   - Use more powerful models without local hardware constraints
   - Mix local and remote models according to your needs
