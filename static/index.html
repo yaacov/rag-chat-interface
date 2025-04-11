@@ -383,7 +383,10 @@
                         body: JSON.stringify({text: question})
                     });
                     const data = await response.json();
-                    const parsedMarkdown = marked.parse(data.response);
+                    
+                    // Normalize line breaks before parsing markdown
+                    const normalizedMarkdown = normalizeLineBreaks(data.response);
+                    const parsedMarkdown = marked.parse(normalizedMarkdown);
                     responseDiv.innerHTML = `<div class="markdown-content">${parsedMarkdown}</div>`;
                      
                     if (data.sources) {
@@ -400,6 +403,15 @@
             }
         }
         
+        // Utility function to normalize line breaks in markdown text
+        function normalizeLineBreaks(text) {
+            if (!text) return '';
+            
+            // Replace multiple consecutive line breaks with just two
+            // (to maintain paragraph separation)
+            return text.replace(/\n{3,}/g, '\n\n');
+        }
+
         async function showHelp() {
             const responseDiv = document.getElementById('response');
             const askButton = document.getElementById('askButton');

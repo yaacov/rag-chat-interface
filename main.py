@@ -407,7 +407,9 @@ def main():
     use_maas_llm = args.llm_api_url is not None and args.llm_api_key is not None
 
     # Use custom embedding model if provided
-    embedding_model_name = args.embedding_model if args.embedding_model else EMBEDDING_MODEL_NAME
+    embedding_model_name = (
+        args.embedding_model if args.embedding_model else EMBEDDING_MODEL_NAME
+    )
 
     # Initialize embedding model - check if MAAS API URL is provided
     embedding_model = get_embedding_model(
