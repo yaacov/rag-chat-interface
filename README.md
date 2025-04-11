@@ -16,7 +16,7 @@ A powerful and secure document interaction system that transforms any document i
 The system uses the following model configurations by default:
 - **LLM Model**: `ibm-granite/granite-3.2-2b-instruct`
 - **Embedding Model**: `ibm-granite/granite-embedding-30m-english`
-- **MAAS**: Optionaly, can use MAAModel-as-a-Service (MAAS) servers (default OFF).
+- **MAAS**: Optionaly, can use Model-as-a-Service (MAAS) servers (default OFF).
 
 You can configure different models based on your needs:
 - Smaller models for faster responses and lower resource usage
