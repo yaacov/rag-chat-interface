@@ -83,6 +83,10 @@ pip install -r requirements.txt
     [--chunk_overlap CHUNK_OVERLAP] \
     [--device GPU_DEVICE] \
     [--llm-model LLM_MODEL_NAME] \
+    [--llm-api-url LLM_API_URL] \
+    [--llm-api-key LLM_API_KEY] \
+    [--embedding-api-url EMBEDDING_API_URL] \
+    [--embedding-api-key EMBEDDING_API_KEY] \
     [--query-log-db QUERY_LOG_DB] \
     [--log-queries]
 ```
@@ -104,10 +108,52 @@ Arguments:
 - `--chunk_overlap`: Overlap between chunks (default: 200 characters)
 - `--device`: Force a specific device (e.g., 'cuda', 'cpu', 'mps'). If not provided, best available device is automatically selected
 - `--llm-model`: Override the default LLM model (default: ibm-granite/granite-3.2-2b-instruct)
+- `--embedding-model`: Override the default embedding model (default: ibm-granite/granite-embedding-30m-english)
+- `--llm-api-url`: URL for the LLM API service (enables MAAS mode for LLM)
+- `--llm-api-key`: API key for the LLM API service
+- `--embedding-api-url`: URL for the embedding API service (enables MAAS mode for embeddings)
+- `--embedding-api-key`: API key for the embedding API service
 - `--query-log-db`: Path to SQLite database for query logging (default: ./query_logs.db)
 - `--log-queries`: Enable logging of queries and responses to SQLite database
 
 2. Open your browser and navigate to `http://localhost:8000`
+
+## Using with Model-as-a-Service (MAAS)
+
+While RAG chat interface is designed to run models locally, you can also connect it to external Model-as-a-Service (MAAS) providers. This allows you to:
+
+- Use more powerful models that may not fit on your local hardware
+- Leverage specialized models offered by MAAS providers
+- Distribute computational load to external services while keeping document data local
+
+### MAAS Configuration
+
+To use MAAS for language model (LLM) capabilities:
+```bash
+.venv/bin/python main.py \
+    --llm-api-url "https://your-llm-service.com/api" \
+    --llm-api-key "your-api-key" \
+    --llm-model "granite-3-8b-instruct" \
+    --embedding-api-url "https://your-embedding-service.com/api" \
+    --embedding-api-key "your-api-key" \
+    --embedding-model "ibm-granite/granite-embedding-30m-english"
+```
+
+You can mix local and remote models. For example, use a local embedding model with a remote LLM:
+```bash
+.venv/bin/python main.py \
+     --llm-api-url "https://your-llm-service.com/api" \
+     --llm-api-key "your-api-key" \
+     --llm-model "granite-3-8b-instruct"
+```
+
+### MAAS API Requirements
+
+The MAAS APIs must be compatible with the following endpoints:
+- LLM API: `/v1/completions` and `/v1/chat/completions` 
+- Embedding API: `/v1/embeddings`
+
+These endpoints should follow standard API formats similar to those used by MAAS providers.
 
 ## Utility Crawler
 

@@ -18,6 +18,8 @@ Dependencies:
 """
 
 from tqdm import tqdm
+from src.maas_client import MaasClient
+from src.local_model_client import LocalModelClient
 
 collection_name = "rag_collection"
 
@@ -30,24 +32,24 @@ def emb_text(embedding_model, text):
     """Convert input text to embeddings using the provided embedding model.
 
     Args:
-        embedding_model: A sentence transformer model that implements encode method
+        embedding_model: A model client (MaasClient or LocalModelClient)
         text (str): The input text to be converted to embeddings
 
     Returns:
         list: A normalized vector representation of the input text
     """
-    return embedding_model.encode([text], normalize_embeddings=True).tolist()[0]
+    return embedding_model.get_embeddings([text])[0]
 
 
 def embed_data(embedding_model, text_lines, source_urls=None):
     """Create embeddings for a collection of text lines.
 
-    This function processes multiple text lines in parallel, showing progress
+    This function processes multiple text lines, showing progress
     with a tqdm progress bar. Each text line is converted to a vector embedding
     and stored with metadata.
 
     Args:
-        embedding_model: Model used for creating embeddings
+        embedding_model: Model client used for creating embeddings
         text_lines (list): List of text strings to be converted to embeddings
         source_urls (list, optional): List of source URLs corresponding to each text line.
             If provided, must be the same length as text_lines.
@@ -60,11 +62,23 @@ def embed_data(embedding_model, text_lines, source_urls=None):
             - source_url (str, optional): Source URL if provided
     """
     data = []
-    for i, line in enumerate(tqdm(text_lines, desc="Creating embeddings")):
-        entry = {"id": i, "vector": emb_text(embedding_model, line), "text": line}
-        if source_urls and i < len(source_urls):
-            entry["source_url"] = source_urls[i]
-        data.append(entry)
+
+    # Process in batches
+    batch_size = 16
+    for i in range(0, len(text_lines), batch_size):
+        batch_texts = text_lines[i : i + batch_size]
+        print(
+            f"Processing batch {i//batch_size + 1}/{(len(text_lines) + batch_size - 1)//batch_size}"
+        )
+        batch_embeddings = embedding_model.get_embeddings(batch_texts)
+
+        for j, embedding in enumerate(batch_embeddings):
+            idx = i + j
+            entry = {"id": idx, "vector": embedding, "text": text_lines[idx]}
+            if source_urls and idx < len(source_urls):
+                entry["source_url"] = source_urls[idx]
+            data.append(entry)
+
     return data
 
 

@@ -47,6 +47,7 @@ from src.model_setup import get_llm_model, get_embedding_model
 from src.milvus_setup import get_milvus_client
 from src.prompt_utils import generate_prompt, clean_assistant_response
 from src.query_logging import setup_sqlite_db, log_query, get_query_history
+from src.maas_client import MaasClient
 
 
 # Define API models
@@ -80,6 +81,8 @@ embedding_model = None
 milvus_client = None
 sqlite_conn = None
 args = None
+use_maas_llm = False
+use_maas_embeddings = False
 
 
 def parse_args():
@@ -138,6 +141,36 @@ def parse_args():
         help=f"Override the default LLM model (default: {LLM_MODEL_NAME})",
     )
     parser.add_argument(
+        "--embedding-model",
+        type=str,
+        default=None,
+        help=f"Override the default embedding model (default: {EMBEDDING_MODEL_NAME})",
+    )
+    parser.add_argument(
+        "--llm-api-url",
+        type=str,
+        default=None,
+        help="URL for the LLM API service (enables MAAS mode for LLM)",
+    )
+    parser.add_argument(
+        "--llm-api-key",
+        type=str,
+        default=None,
+        help="API key for the LLM API service",
+    )
+    parser.add_argument(
+        "--embedding-api-url",
+        type=str,
+        default=None,
+        help="URL for the embedding API service (enables MAAS mode for embeddings)",
+    )
+    parser.add_argument(
+        "--embedding-api-key",
+        type=str,
+        default=None,
+        help="API key for the embedding API service",
+    )
+    parser.add_argument(
         "--query-log-db",
         type=str,
         default="./query_logs.db",
@@ -168,6 +201,7 @@ def cleanup_cuda_memory():
 
 def generate_response(query):
     """Generate a response to a given question using the model and Milvus database."""
+
     start_time = time.time()
     try:
         search_res = search_milvus_db(milvus_client, embedding_model, query, limit=5)
@@ -185,18 +219,10 @@ def generate_response(query):
 
         augmented_query = generate_prompt(retrieved_lines_with_distances, query)
 
-        chat_data = [
-            {"role": "user", "content": augmented_query},
-        ]
-        chat = tokenizer.apply_chat_template(
-            chat_data, tokenize=False, add_generation_prompt=True
+        response = model.get_completion(
+            augmented_query, max_tokens=500, temperature=0.0
         )
-        input_tokens = tokenizer(chat, return_tensors="pt").to(device)
 
-        output = model.generate(**input_tokens, max_new_tokens=500)
-        output = tokenizer.batch_decode(output)
-
-        response = clean_assistant_response(output[0])
         execution_time_ms = int((time.time() - start_time) * 1000)
 
         # Log the query and response if logging is enabled
@@ -269,9 +295,17 @@ def get_system_info():
         "row_count"
     ]
 
+    # Update system info to reflect MAAS usage if applicable
+    llm_model_info = f"{LLM_MODEL_NAME} (MAAS)" if use_maas_llm else LLM_MODEL_NAME
+    embedding_model_info = (
+        f"{EMBEDDING_MODEL_NAME} (MAAS)"
+        if use_maas_embeddings
+        else EMBEDDING_MODEL_NAME
+    )
+
     info = {
-        "LLM Model": LLM_MODEL_NAME,
-        "Embedding Model": EMBEDDING_MODEL_NAME,
+        "LLM Model": llm_model_info,
+        "Embedding Model": embedding_model_info,
         "Vector DB": "Milvus",
         "Collection Name": collection_name,
         "Number of Records": collection_num_of_records,
@@ -348,6 +382,8 @@ async def get_query_history_endpoint(limit: int = 10, offset: int = 0):
 
 def main():
     global args, device, tokenizer, model, embedding_model, milvus_client, sqlite_conn
+    global use_maas_llm, use_maas_embeddings
+
     args = parse_args()
 
     # Setup model cache directory
@@ -358,11 +394,31 @@ def main():
 
     # Use custom LLM model if provided
     llm_model_name = args.llm_model if args.llm_model else LLM_MODEL_NAME
-    tokenizer, model = get_llm_model(model_path=llm_model_name, device=device)
 
-    embedding_model = get_embedding_model(
-        model_name=EMBEDDING_MODEL_NAME, device=device
+    # Initialize LLM - check if MAAS API URL is provided
+    _, model = get_llm_model(
+        model_path=llm_model_name,
+        device=device,
+        llm_api_url=args.llm_api_url,
+        llm_api_key=args.llm_api_key,
     )
+
+    # Determine if we're using MAAS for LLM
+    use_maas_llm = args.llm_api_url is not None and args.llm_api_key is not None
+
+    # Use custom embedding model if provided
+    embedding_model_name = args.embedding_model if args.embedding_model else EMBEDDING_MODEL_NAME
+
+    # Initialize embedding model - check if MAAS API URL is provided
+    embedding_model = get_embedding_model(
+        model_name=embedding_model_name,
+        device=device,
+        embedding_api_url=args.embedding_api_url,
+        embedding_api_key=args.embedding_api_key,
+    )
+
+    # Determine if we're using MAAS for embeddings
+    use_maas_embeddings = isinstance(embedding_model, MaasClient)
 
     # Initialize Milvus client with the path from args
     milvus_client = get_milvus_client(args.db_path)
