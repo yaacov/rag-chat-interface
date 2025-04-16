@@ -288,7 +288,7 @@ def setup_collection():
         return
 
 
-def get_system_info():
+def get_system_info(llm_model_name, embedding_model_name):
     """Get system information including models and database stats."""
     collection_name = get_collection_name()
     collection_num_of_records = milvus_client.get_collection_stats(collection_name)[
@@ -296,11 +296,11 @@ def get_system_info():
     ]
 
     # Update system info to reflect MAAS usage if applicable
-    llm_model_info = f"{LLM_MODEL_NAME} (MAAS)" if use_maas_llm else LLM_MODEL_NAME
+    llm_model_info = f"{llm_model_name} (MAAS)" if use_maas_llm else llm_model_name
     embedding_model_info = (
-        f"{EMBEDDING_MODEL_NAME} (MAAS)"
+        f"{embedding_model_name} (MAAS)"
         if use_maas_embeddings
-        else EMBEDDING_MODEL_NAME
+        else embedding_model_name
     )
 
     info = {
@@ -317,7 +317,9 @@ def get_system_info():
 async def ask_question(question: Question):
     try:
         if question.text.lower() == "dump":
-            return get_system_info()
+            llm_model_name_val = args.llm_model if args and args.llm_model else LLM_MODEL_NAME
+            embedding_model_name_val = args.embedding_model if args and args.embedding_model else EMBEDDING_MODEL_NAME
+            return get_system_info(llm_model_name_val, embedding_model_name_val)
         if question.text.lower() == "help":
             return {"response": HELP_TEXT}
 
