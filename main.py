@@ -12,7 +12,7 @@ import time
 
 # Constants
 # Choose the model name from the following list:
-# "ibm-granite/granite-3.2-2b-instruct", "ibm-granite/granite-3.2-8b-instruct"
+# "ibm-granite/granite-3.2-2b-instruct", "ibm-granite/granite-3.3-8b-instruct"
 LLM_MODEL_NAME = "ibm-granite/granite-3.2-2b-instruct"
 EMBEDDING_MODEL_NAME = (
     "ibm-granite/granite-embedding-30m-english"  # choose model size: 30m /125m

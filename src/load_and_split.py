@@ -2,6 +2,12 @@ import requests
 import os
 import tempfile
 from urllib.parse import urlparse
+import mimetypes
+import re
+try:
+    import magic
+except ImportError:
+    magic = None
 from langchain_community.document_loaders import (
     TextLoader,
     BSHTMLLoader,
@@ -18,10 +24,10 @@ def load_and_split(
     downloads_dir: str = None,
 ):
     """General function to load and split any supported file type."""
-    file_type = get_file_type(source)
-
     # Handle URL downloads first
     local_source = download_if_url(source, downloads_dir)
+
+    file_type = get_file_type(local_source)
 
     if file_type == "html":
         return load_and_split_html(local_source, chunk_size, chunk_overlap)
@@ -35,7 +41,43 @@ def load_and_split(
         return load_and_split_text(local_source, chunk_size, chunk_overlap)
 
 
+def looks_like_markdown(source: str) -> bool:
+    try:
+        with open(source, "r", encoding="utf-8", errors="ignore") as f:
+            text = f.read(2048)
+    except Exception:
+        return False
+    patterns = [
+        r"(^|\n)#{1,6}\s",         # headers
+        r"\[[^\]]+\]\([^)]+\)",    # links
+        r"(^|\n)[*-]\s",           # lists
+        r"```",                    # code fences
+    ]
+    return any(re.search(p, text) for p in patterns)
+
+
 def get_file_type(source: str) -> str:
+    if os.path.exists(source):
+        try:
+            mime = magic.from_file(source, mime=True) if magic else None
+        except Exception:
+            mime = None
+        if not mime:
+            mime, _ = mimetypes.guess_type(source)
+        
+        # Test for Markdown content before falling back to extension
+        if not mime and looks_like_markdown(source):
+            return "markdown"
+        
+        # Check for common file types
+        if mime:
+            if "pdf" in mime:
+                return "pdf"
+            if "html" in mime:
+                return "html"
+            if "officedocument" in mime or "msword" in mime:
+                return "word"
+    
     if source.lower().endswith((".html", ".htm")):
         return "html"
     if source.lower().endswith(".md"):
@@ -44,6 +86,7 @@ def get_file_type(source: str) -> str:
         return "pdf"
     if source.lower().endswith((".doc", ".docx")):
         return "word"
+    
     return "text"
 
 

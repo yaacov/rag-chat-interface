@@ -1,7 +1,7 @@
 .PHONY: format lint clean clean-all clean-models clean-db install run venv
 
 # Default paths and commands
-PYTHON = python3.10
+PYTHON = python3.13
 VENV = .venv
 VENV_BIN = $(VENV)/bin
 PIP = $(VENV_BIN)/pip

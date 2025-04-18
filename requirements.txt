@@ -14,3 +14,4 @@ beautifulsoup4
 lxml
 pymupdf
 pypdf
+python-magic
