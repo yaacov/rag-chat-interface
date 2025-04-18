@@ -42,6 +42,7 @@ volumes/
 *.pt
 *.pth
 *.bin
+.env
 
 # Milvus
 milvus/
