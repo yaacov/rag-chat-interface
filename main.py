@@ -12,8 +12,8 @@ import time
 
 # Constants
 # Choose the model name from the following list:
-# "ibm-granite/granite-3.2-2b-instruct", "ibm-granite/granite-3.3-8b-instruct"
-LLM_MODEL_NAME = "ibm-granite/granite-3.2-2b-instruct"
+# "ibm-granite/granite-3.3-2b-instruct", "ibm-granite/granite-3.3-8b-instruct"
+LLM_MODEL_NAME = "ibm-granite/granite-3.3-2b-instruct"
 EMBEDDING_MODEL_NAME = (
     "ibm-granite/granite-embedding-30m-english"  # choose model size: 30m /125m
 )
@@ -220,7 +220,7 @@ def generate_response(query):
         augmented_query = generate_prompt(retrieved_lines_with_distances, query)
 
         response = model.get_completion(
-            augmented_query, max_tokens=500, temperature=0.0
+            augmented_query, max_tokens=1000, temperature=0.0
         )
 
         execution_time_ms = int((time.time() - start_time) * 1000)

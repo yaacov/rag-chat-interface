@@ -1,4 +1,5 @@
 import torch
+from src.prompt_utils import extract_rag_answer  # new import
 
 
 class LocalModelClient:
@@ -39,7 +40,7 @@ class LocalModelClient:
         except Exception as e:
             raise Exception(f"Local embeddings model error: {str(e)}")
 
-    def get_completion(self, prompt, max_tokens=500, temperature=0.0):
+    def get_completion(self, prompt, max_tokens=1000, temperature=0.0):
         """Get completion from a local language model.
 
         Args:
@@ -65,8 +66,8 @@ class LocalModelClient:
                 **input_tokens,
             }
 
-            # For temperature=0, use greedy decoding
-            if temperature == 0:
+            # For temperature!=0, use greedy decoding
+            if temperature != 0:
                 gen_kwargs["do_sample"] = False
 
             with torch.no_grad():
@@ -77,7 +78,10 @@ class LocalModelClient:
                 output, skip_special_tokens=True
             )[0]
 
-            # For some models, we might need to trim the prompt from the output
+            # Extract any <rag-answer>…</rag-answer> content
+            decoded_output = extract_rag_answer(decoded_output)
+
+            # Trim off the prompt if model echoes it
             if decoded_output.startswith(prompt):
                 return decoded_output[len(prompt) :].strip()
 
@@ -86,7 +90,7 @@ class LocalModelClient:
         except Exception as e:
             raise Exception(f"Local model completion error: {str(e)}")
 
-    def get_chat_completion(self, messages, max_tokens=500, temperature=0.0):
+    def get_chat_completion(self, messages, max_tokens=1000, temperature=0.0):
         """Get chat completion from a local language model.
 
         Args:

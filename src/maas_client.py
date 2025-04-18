@@ -1,5 +1,7 @@
 import requests
 
+from src.prompt_utils import extract_rag_answer
+
 
 class MaasClient:
     """Client for interacting with Model-As-A-Service APIs."""
@@ -51,7 +53,7 @@ class MaasClient:
         except Exception as e:
             raise Exception(f"MAAS embeddings API error: {str(e)}")
 
-    def get_completion(self, prompt, max_tokens=500, temperature=0.0):
+    def get_completion(self, prompt, max_tokens=1000, temperature=0.0):
         """Get completion from the MAAS API.
 
         Args:
@@ -93,7 +95,7 @@ class MaasClient:
             if not completion_text:
                 raise ValueError(f"Invalid API response: {result}")
 
-            return completion_text
+            return extract_rag_answer(completion_text)
 
         except Exception as e:
             raise Exception(f"MAAS completions API error: {str(e)}")
@@ -141,7 +143,7 @@ class MaasClient:
             if not content:
                 raise ValueError(f"Invalid API response: {result}")
 
-            return content
+            return extract_rag_answer(content)
 
         except Exception as e:
             raise Exception(f"MAAS chat completions API error: {str(e)}")

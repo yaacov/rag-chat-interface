@@ -10,7 +10,22 @@ PROMPT_TEMPLATE = """
     <question>
     {question}
     </question>
+    
+    Please provide only the answer below, without repeating the question or any additional commentary.
+    enclode your answer wrapped in the tag <rag-answer>
 """
+
+# Define the tags used in prompts
+RAG_ANSWER_START_TAG = "<rag-answer>"
+RAG_ANSWER_END_TAG   = "</rag-answer>"
+
+def extract_rag_answer(text: str) -> str:
+    """Extract content enclosed in RAG answer tags, if present."""
+    start = text.find(RAG_ANSWER_START_TAG)
+    end   = text.find(RAG_ANSWER_END_TAG)
+    if start != -1 and end != -1 and end > start:
+        return text[start + len(RAG_ANSWER_START_TAG):end].strip()
+    return text
 
 
 def generate_prompt(context, question):
