@@ -14,11 +14,13 @@ A powerful and secure document interaction system that transforms any document i
 ## Local AI models
 
 The system uses the following model configurations by default:
-- **LLM Model**: `ibm-granite/granite-3.2-2b-instruct`
+
+- **LLM Model**: `ibm-granite/granite-3.3-2b-instruct`
 - **Embedding Model**: `ibm-granite/granite-embedding-30m-english`
 - **MAAS**: Optionaly, can use Model-as-a-Service (MAAS) servers (default OFF).
 
 You can configure different models based on your needs:
+
 - Smaller models for faster responses and lower resource usage
 - Larger models for higher quality responses when compute resources are available
 - Balance between model size and performance based on your hardware capabilities
@@ -59,15 +61,17 @@ You can configure different models based on your needs:
 ## Installation
 
 1. Clone the repository:
-```bash
-git clone https://github.com/yaacov/rag-chat-interface.git
-cd rag-chat-interface
-```
+
+    ```bash
+    git clone https://github.com/yaacov/rag-chat-interface.git
+    cd rag-chat-interface
+    ```
 
 2. Install dependencies:
+
 ```bash
 # Optional: set a virtual env
-python3.10 -m venv .venv
+python3.13 -m venv .venv
 source .venv/bin/activate
 
 # Install dependencies
@@ -77,6 +81,7 @@ pip install -r requirements.txt
 ## Usage
 
 1. Start the server:
+
 ```bash
 .venv/bin/python main.py \
     [--source INITIAL_SOURCE] \
@@ -98,12 +103,14 @@ pip install -r requirements.txt
 ```
 
 Example:
+
 ```bash
 # Override LLM model and GPU device
 .venv/bin/python main.py --llm-model ibm-granite/granite-3.2-8b-instruct --device cpu
 ```
 
 Arguments:
+
 - `--source`: Initial source to load - can be a file, directory, or URL (optional)
 - `--host`: Host to bind the server to (default: 0.0.0.0)
 - `--port`: Port to bind the server to (default: 8000)
@@ -135,6 +142,7 @@ While RAG chat interface is designed to run models locally, you can also connect
 ### MAAS Configuration
 
 To use MAAS for language model (LLM) capabilities:
+
 ```bash
 .venv/bin/python main.py \
     --llm-api-url "https://your-llm-service.com/api" \
@@ -142,10 +150,12 @@ To use MAAS for language model (LLM) capabilities:
     --llm-model "granite-3-8b-instruct" \
     --embedding-api-url "https://your-embedding-service.com/api" \
     --embedding-api-key "your-api-key" \
-    --embedding-model "ibm-granite/granite-embedding-30m-english"
+    --embedding-model "ibm-granite/granite-embedding-30m-english" \
+    --chunk_size 1000
 ```
 
 You can mix local and remote models. For example, use a local embedding model with a remote LLM:
+
 ```bash
 .venv/bin/python main.py \
      --llm-api-url "https://your-llm-service.com/api" \
@@ -156,10 +166,68 @@ You can mix local and remote models. For example, use a local embedding model wi
 ### MAAS API Requirements
 
 The MAAS APIs must be compatible with the following endpoints:
-- LLM API: `/v1/completions` and `/v1/chat/completions` 
+
+- LLM API: `/v1/completions` and `/v1/chat/completions`
 - Embedding API: `/v1/embeddings`
 
 These endpoints should follow standard API formats similar to those used by MAAS providers.
+
+## Kubernetes Deployment
+
+Apply the manifest and expose the service as a public Route:
+
+```bash
+oc apply -f deployment.yaml
+oc get routes
+```
+
+Visit the listed `HOST/PORT` to access the UI.
+
+### Creating the Secret and Applying
+
+1. Copy `.env.example` to `.env` and customize as needed:
+
+   ```bash
+   cp .env.example .env
+   # edit .env to fill in your API URLs/keys, etc.
+   ```
+
+2. Create a Kubernetes Secret from your `.env`:
+
+   ```bash
+   kubectl create secret generic rag-chat-secret --from-env-file=.env
+   ```
+
+3. Apply the deployment and service:
+
+   ```bash
+   kubectl apply -f deployment.yaml
+   ```
+
+4. Verify and access:
+
+   ```bash
+   kubectl get pods,svc
+   # visit the external IP or LoadBalancer address on port 80
+   ```
+
+## Building & Running with Podman
+
+Build the image:
+
+```bash
+podman build -t quay.io/yaacov/rag-chat-interface .
+```
+
+Run the container (bind port 8000):
+
+```bash
+podman run -it --rm \
+  -p 8000:8000 \
+  quay.io/yaacov/rag-chat-interface
+```
+
+Access the UI at <http://localhost:8000>
 
 ## Utility Crawler
 

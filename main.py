@@ -399,6 +399,7 @@ def main():
 
     # Initialize models
     device = args.device if args.device else get_device()
+    print(f"Using device: {device}")
 
     # Use custom LLM model if provided
     llm_model_name = args.llm_model if args.llm_model else LLM_MODEL_NAME

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rag-chat-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rag-chat
+  template:
+    metadata:
+      labels:
+        app: rag-chat
+    spec:
+      containers:
+        - name: rag-chat
+          image: quay.io/yaacov/rag-chat-interface:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: rag-chat-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rag-chat-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: rag-chat
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
