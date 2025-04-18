@@ -121,9 +121,9 @@ Arguments:
 - `--chunk_overlap`: Overlap between chunks (default: 200 characters)
 - `--device`: Force a specific device (e.g., 'cuda', 'cpu', 'mps'). If not provided, best available device is automatically selected
 - `--llm-model`: Override the default LLM model (default: ibm-granite/granite-3.2-2b-instruct)
-- `--embedding-model`: Override the default embedding model (default: ibm-granite/granite-embedding-30m-english)
 - `--llm-api-url`: URL for the LLM API service (enables MAAS mode for LLM)
 - `--llm-api-key`: API key for the LLM API service
+- `--embedding-model`: Override the default embedding model (default: ibm-granite/granite-embedding-30m-english)
 - `--embedding-api-url`: URL for the embedding API service (enables MAAS mode for embeddings)
 - `--embedding-api-key`: API key for the embedding API service
 - `--query-log-db`: Path to SQLite database for query logging (default: ./query_logs.db)
@@ -173,15 +173,6 @@ The MAAS APIs must be compatible with the following endpoints:
 These endpoints should follow standard API formats similar to those used by MAAS providers.
 
 ## Kubernetes Deployment
-
-Apply the manifest and expose the service as a public Route:
-
-```bash
-oc apply -f deployment.yaml
-oc get routes
-```
-
-Visit the listed `HOST/PORT` to access the UI.
 
 ### Creating the Secret and Applying
 
