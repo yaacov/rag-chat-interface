@@ -3,7 +3,7 @@ PROMPT_TEMPLATE = """
     The context is divided into numbered snippets from different documentation sources.
     If some snippets are not relevant to the question, ignore the irrelevant ones.
     Enclode your answer wrapped in openning and closeing [raganswer] tags, e.g. [raganswer] answer [/raganswer].
-    Please provide only the answer below, without repeating the question or any additional commentary.
+    Please provide only the answer below in mark down format, without repeating the question or any additional commentary.
     
     [context]
     {context}

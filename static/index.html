@@ -438,9 +438,7 @@
         function normalizeLineBreaks(text) {
             if (!text) return '';
             
-            // Replace multiple consecutive line breaks with just two
-            // (to maintain paragraph separation)
-            return text.replace(/\n{3,}/g, '\n\n');
+            return text;
         }
 
         async function showHelp() {
