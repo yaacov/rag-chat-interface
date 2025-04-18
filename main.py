@@ -317,8 +317,14 @@ def get_system_info(llm_model_name, embedding_model_name):
 async def ask_question(question: Question):
     try:
         if question.text.lower() == "dump":
-            llm_model_name_val = args.llm_model if args and args.llm_model else LLM_MODEL_NAME
-            embedding_model_name_val = args.embedding_model if args and args.embedding_model else EMBEDDING_MODEL_NAME
+            llm_model_name_val = (
+                args.llm_model if args and args.llm_model else LLM_MODEL_NAME
+            )
+            embedding_model_name_val = (
+                args.embedding_model
+                if args and args.embedding_model
+                else EMBEDDING_MODEL_NAME
+            )
             return get_system_info(llm_model_name_val, embedding_model_name_val)
         if question.text.lower() == "help":
             return {"response": HELP_TEXT}

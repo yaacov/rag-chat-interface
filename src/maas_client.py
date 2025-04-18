@@ -95,7 +95,7 @@ class MaasClient:
             if not completion_text:
                 raise ValueError(f"Invalid API response: {result}")
 
-            return extract_rag_answer(completion_text)
+            return extract_rag_answer(completion_text, prompt)
 
         except Exception as e:
             raise Exception(f"MAAS completions API error: {str(e)}")

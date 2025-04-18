@@ -1,31 +1,53 @@
 PROMPT_TEMPLATE = """
-    Use the following pieces of information enclosed in <context> tags to provide an answer to the question enclosed in <question> tags.
+    Use the following pieces of information enclosed in [context] tags to provide an answer to the question enclosed in [question] tags.
     The context is divided into numbered snippets from different documentation sources.
     If some snippets are not relevant to the question, ignore the irrelevant ones.
-    
-    <context>
-    {context}
-    </context>
-    
-    <question>
-    {question}
-    </question>
-    
+    Enclode your answer wrapped in openning and closeing [raganswer] tags, e.g. [raganswer] answer [/raganswer].
     Please provide only the answer below, without repeating the question or any additional commentary.
-    enclode your answer wrapped in the tag <rag-answer>
+    
+    [context]
+    {context}
+    [/context]
+    
+    [question]
+    {question}
+    [/question]
 """
 
 # Define the tags used in prompts
-RAG_ANSWER_START_TAG = "<rag-answer>"
-RAG_ANSWER_END_TAG   = "</rag-answer>"
+RAG_ANSWER_START_TAG = "[raganswer]"
+RAG_ANSWER_END_TAG = "[/raganswer]"
 
-def extract_rag_answer(text: str) -> str:
-    """Extract content enclosed in RAG answer tags, if present."""
-    start = text.find(RAG_ANSWER_START_TAG)
-    end   = text.find(RAG_ANSWER_END_TAG)
+import re
+
+
+def extract_rag_answer(text: str, prompt: str) -> str:
+    """Extract content enclosed in RAG answer tags, if present, and remove any prompt echo."""
+    # Try to extract between RAG tags
+    start = text.rfind(RAG_ANSWER_START_TAG)
+    end = text.rfind(RAG_ANSWER_END_TAG)
+    if end == -1:
+        end = len(text)
+
     if start != -1 and end != -1 and end > start:
-        return text[start + len(RAG_ANSWER_START_TAG):end].strip()
-    return text
+        return text[start + len(RAG_ANSWER_START_TAG) : end].strip()
+
+    # Try to remove the entire prompt if present
+    content = text
+    if prompt and prompt in content:
+        return content.replace(prompt, "").strip()
+
+    # Try to remove section between first/last few words of the prompt
+    words = prompt.split()
+    if len(words) >= 10:
+        head = " ".join(words[:5])
+        tail = " ".join(words[-5:])
+        pattern = re.escape(head) + r".*?" + re.escape(tail)
+        cleaned = re.sub(pattern, "", text, flags=re.DOTALL)
+        return cleaned.strip()
+
+    # fallback: return stripped original
+    return text.strip()
 
 
 def generate_prompt(context, question):
@@ -34,16 +56,24 @@ def generate_prompt(context, question):
         text = line_with_distance[0]
         # If there's a distance/score available, include it
         score = line_with_distance[1] if len(line_with_distance) > 1 else None
+        # if there's a url available, include it
+        url = line_with_distance[2] if len(line_with_distance) > 2 else None
 
-        snippet = f"[SNIPPET {i+1}]"
+        snippet = f'[SOURCE id="{i + 1}"'
         if score is not None:
-            snippet += f" (relevance: {score:.4f})"
-        snippet += f"\n{text}\n[END SNIPPET {i+1}]"
+            snippet += f' relevance="{score:.4f}"'
+        if url is not None:
+            snippet += f' url="{url}"'
+        snippet += f"]\n{text}\n[/SOURCE]"
 
         formatted_snippets.append(snippet)
 
     context_text = "\n\n".join(formatted_snippets)
-    return PROMPT_TEMPLATE.format(context=context_text, question=question)
+    return PROMPT_TEMPLATE.format(
+        context=context_text,
+        question=question,
+        RAG_ANSWER_START_TAG=RAG_ANSWER_START_TAG,
+    )
 
 
 def clean_assistant_response(response):

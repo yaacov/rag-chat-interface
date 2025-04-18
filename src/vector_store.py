@@ -18,6 +18,7 @@ Dependencies:
 """
 
 from tqdm import tqdm
+import re
 from src.maas_client import MaasClient
 from src.local_model_client import LocalModelClient
 
@@ -61,20 +62,36 @@ def embed_data(embedding_model, text_lines, source_urls=None):
             - text (str): Original text content
             - source_url (str, optional): Source URL if provided
     """
+    # Clean and normalize lines: strip, drop empties, collapse multiple newlines
+    cleaned_texts = []
+    cleaned_urls = [] if source_urls else None
+    for idx, text in enumerate(text_lines):
+        stripped = text.strip()
+        if not stripped:
+            continue
+        # normalize CRLF, CR or LF runs into a single '\n'
+        normalized = re.sub(r"(\r\n|\r|\n)+", "\n", stripped)
+        cleaned_texts.append(normalized)
+        if cleaned_urls is not None:
+            cleaned_urls.append(source_urls[idx])
+
     data = []
+    # rename for clarity
+    lines = cleaned_texts
+    source_urls = cleaned_urls
 
     # Process in batches
     batch_size = 16
-    for i in range(0, len(text_lines), batch_size):
-        batch_texts = text_lines[i : i + batch_size]
+    for i in range(0, len(lines), batch_size):
+        batch_texts = lines[i : i + batch_size]
         print(
-            f"Processing batch {i//batch_size + 1}/{(len(text_lines) + batch_size - 1)//batch_size}"
+            f"Processing batch {i//batch_size + 1}/{(len(lines) + batch_size - 1)//batch_size}"
         )
         batch_embeddings = embedding_model.get_embeddings(batch_texts)
 
         for j, embedding in enumerate(batch_embeddings):
             idx = i + j
-            entry = {"id": idx, "vector": embedding, "text": text_lines[idx]}
+            entry = {"id": idx, "vector": embedding, "text": lines[idx]}
             if source_urls and idx < len(source_urls):
                 entry["source_url"] = source_urls[idx]
             data.append(entry)

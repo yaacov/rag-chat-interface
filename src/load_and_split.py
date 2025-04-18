@@ -4,6 +4,7 @@ import tempfile
 from urllib.parse import urlparse
 import mimetypes
 import re
+
 try:
     import magic
 except ImportError:
@@ -48,10 +49,10 @@ def looks_like_markdown(source: str) -> bool:
     except Exception:
         return False
     patterns = [
-        r"(^|\n)#{1,6}\s",         # headers
-        r"\[[^\]]+\]\([^)]+\)",    # links
-        r"(^|\n)[*-]\s",           # lists
-        r"```",                    # code fences
+        r"(^|\n)#{1,6}\s",  # headers
+        r"\[[^\]]+\]\([^)]+\)",  # links
+        r"(^|\n)[*-]\s",  # lists
+        r"```",  # code fences
     ]
     return any(re.search(p, text) for p in patterns)
 
@@ -64,11 +65,11 @@ def get_file_type(source: str) -> str:
             mime = None
         if not mime:
             mime, _ = mimetypes.guess_type(source)
-        
+
         # Test for Markdown content before falling back to extension
         if not mime and looks_like_markdown(source):
             return "markdown"
-        
+
         # Check for common file types
         if mime:
             if "pdf" in mime:
@@ -77,7 +78,7 @@ def get_file_type(source: str) -> str:
                 return "html"
             if "officedocument" in mime or "msword" in mime:
                 return "word"
-    
+
     if source.lower().endswith((".html", ".htm")):
         return "html"
     if source.lower().endswith(".md"):
@@ -86,7 +87,7 @@ def get_file_type(source: str) -> str:
         return "pdf"
     if source.lower().endswith((".doc", ".docx")):
         return "word"
-    
+
     return "text"
 
 

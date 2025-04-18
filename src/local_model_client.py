@@ -67,7 +67,7 @@ class LocalModelClient:
             }
 
             # For temperature!=0, use greedy decoding
-            if temperature != 0:
+            if temperature == 0:
                 gen_kwargs["do_sample"] = False
 
             with torch.no_grad():
@@ -79,11 +79,7 @@ class LocalModelClient:
             )[0]
 
             # Extract any <rag-answer>…</rag-answer> content
-            decoded_output = extract_rag_answer(decoded_output)
-
-            # Trim off the prompt if model echoes it
-            if decoded_output.startswith(prompt):
-                return decoded_output[len(prompt) :].strip()
+            decoded_output = extract_rag_answer(decoded_output, prompt)
 
             return decoded_output.strip()
 
