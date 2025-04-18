@@ -147,7 +147,7 @@ To use MAAS for language model (LLM) capabilities:
 .venv/bin/python main.py \
     --llm-api-url "https://your-llm-service.com/api" \
     --llm-api-key "your-api-key" \
-    --llm-model "granite-3-8b-instruct" \
+    --llm-model "ibm-granite/granite-3-8b-instruct" \
     --embedding-api-url "https://your-embedding-service.com/api" \
     --embedding-api-key "your-api-key" \
     --embedding-model "ibm-granite/granite-embedding-30m-english" \
@@ -215,8 +215,17 @@ Run the container (bind port 8000):
 ```bash
 podman run -it --rm \
   -p 8000:8000 \
+  -e LLM_API_URL="$LLM_API_URL" \
+  -e LLM_API_KEY="$LLM_API_KEY" \
+  -e LLM_MODEL="$LLM_MODEL" \
+  -e EMBEDDING_API_URL="$EMBEDDING_API_URL" \
+  -e EMBEDDING_API_KEY="$EMBEDDING_API_KEY" \
+  -e EMBEDDING_MODEL="$EMBEDDING_MODEL" \
   quay.io/yaacov/rag-chat-interface
 ```
+
+> Note: Podman containers may not have host GPU access by default.  
+> To enable GPU support, pass appropriate flags (e.g., `--device /dev/nvidia0`) or use a GPU‑enabled runtime.
 
 Access the UI at <http://localhost:8000>
 
