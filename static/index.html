@@ -215,6 +215,21 @@
             line-height: 1.4;
             border-left: 3px solid #555;
         }
+        /* Add toggle button style for source snippets */
+        .source-toggle {
+            background-color: #444;
+            border: none;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #6d9eeb;
+            cursor: pointer;
+            margin-right: 8px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -318,7 +333,27 @@
                 sources.forEach(source => {
                     const listItem = document.createElement('li');
                     
-                    // Create source content with URL as link and text preview
+                    let textSnippet, toggleBtn;
+                    if (source.text) {
+                        textSnippet = document.createElement('div');
+                        textSnippet.textContent = `... ${source.text} ...`;
+                        textSnippet.className = 'source-text-snippet';
+                        textSnippet.style.display = 'none';
+
+                        toggleBtn = document.createElement('button');
+                        toggleBtn.className = 'source-toggle';
+                        toggleBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                        toggleBtn.onclick = () => {
+                            const isHidden = textSnippet.style.display === 'none';
+                            textSnippet.style.display = isHidden ? 'block' : 'none';
+                            toggleBtn.innerHTML = isHidden 
+                                ? '<i class="fas fa-chevron-down"></i>' 
+                                : '<i class="fas fa-chevron-right"></i>';
+                        };
+                        listItem.appendChild(toggleBtn);
+                    }
+
+                    // add URL or file path after the toggle
                     const urlPattern = /^(https?:\/\/)/i;
                     if (source.url && urlPattern.test(source.url)) {
                         const link = document.createElement('a');
@@ -327,20 +362,16 @@
                         link.textContent = source.url;
                         listItem.appendChild(link);
                     } else if (source.url) {
-                        // For non-URL sources like file paths
                         const sourceLabel = document.createElement('span');
                         sourceLabel.textContent = source.url;
                         listItem.appendChild(sourceLabel);
                     }
-                    
-                    // Add text snippet if available
+
+                    // then attach the snippet div
                     if (source.text) {
-                        const textSnippet = document.createElement('div');
-                        textSnippet.textContent = `... ${source.text} ...`;
-                        textSnippet.className = 'source-text-snippet';
                         listItem.appendChild(textSnippet);
                     }
-                    
+
                     sourcesList.appendChild(listItem);
                 });
                 sourcesContainer.style.display = 'block';
