@@ -204,7 +204,7 @@ def generate_response(query):
 
     start_time = time.time()
     try:
-        search_res = search_milvus_db(milvus_client, embedding_model, query, limit=5)
+        search_res = search_milvus_db(milvus_client, embedding_model, query, limit=8)
         retrieved_lines_with_distances = []
         sources = []
 

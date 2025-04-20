@@ -41,8 +41,10 @@ ENV APP_SOURCE="" \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application sources
-COPY . .
+# Copy application sources (only main.py, src, static)
+COPY main.py .
+COPY src ./src
+COPY static ./static
 
 # Expose FastAPI port
 EXPOSE 8000

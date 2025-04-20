@@ -200,6 +200,9 @@ These endpoints should follow standard API formats similar to those used by MAAS
    ```bash
    kubectl get pods,svc
    # visit the external IP or LoadBalancer address on port 80
+
+   # On Openshift you can also create an external route
+   oc expose svc/rag-chat-service
    ```
 
 ## Building & Running with Podman
