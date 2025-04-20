@@ -203,6 +203,14 @@ These endpoints should follow standard API formats similar to those used by MAAS
 
    # On Openshift you can also create an external route
    oc expose svc/rag-chat-service
+
+   # The service is http:// only, you can ask Openshift, to redirect calls using internal tls
+   # to support https://
+   #
+   # tls:
+   #   termination: edge
+   #   insecureEdgeTerminationPolicy: Redirect
+
    ```
 
 ## Building & Running with Podman
