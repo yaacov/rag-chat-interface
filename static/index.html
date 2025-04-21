@@ -278,11 +278,35 @@
    "What are the main points in the document?"
    "Summarize the key findings"`;
 
+        // Add question history tracking
+        let questionHistory = [];
+        let historyIndex = -1;
+
         // Add this before the askQuestion function
         document.getElementById('question').addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault(); // Prevent default newline
                 askQuestion();
+            }
+            
+            // Navigate through history with arrow keys
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (questionHistory.length > 0 && historyIndex < questionHistory.length - 1) {
+                    historyIndex++;
+                    this.value = questionHistory[questionHistory.length - 1 - historyIndex];
+                }
+            }
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    this.value = questionHistory[questionHistory.length - 1 - historyIndex];
+                } else if (historyIndex === 0) {
+                    historyIndex = -1;
+                    this.value = '';
+                }
             }
         });
 
@@ -382,12 +406,15 @@
 
         async function askQuestion() {
             // Get the question from the input field
-            // and clear the input field
             const question = document.getElementById('question').value;
-            document.getElementById('question').value = '';
-            if (!question) {
+            // Store question in history instead of clearing immediately
+            if (question) {
+                questionHistory.push(question);
+                historyIndex = -1;
+            } else {
                 return;
             }
+            
             const loadingDiv = document.getElementById('loading');
             const responseDiv = document.getElementById('response');
             const askButton = document.getElementById('askButton');
@@ -419,6 +446,8 @@
                     
                     const data = await response.json();
                     responseDiv.innerHTML = `<p><strong>Status:</strong> ${data.message}</p>`;
+                    // Clear the input field after successful response
+                    document.getElementById('question').value = '';
                 } else {
                     const response = await fetch('/ask', {
                         method: 'POST',
@@ -441,6 +470,9 @@
                     if (data.sources) {
                         displaySources(data.sources);
                     }
+                    
+                    // Clear the input field after successful response
+                    document.getElementById('question').value = '';
                 }
             } catch (error) {
                 responseDiv.innerHTML = `<p style="color: red;"><strong>Error:</strong> ${error.message}</p>`;

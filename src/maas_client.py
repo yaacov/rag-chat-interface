@@ -39,11 +39,12 @@ class MaasClient:
             cleaned = cleaned[1:-1]
         return cleaned
 
-    def get_embeddings(self, texts):
+    def get_embeddings(self, texts, timeout=180):
         """Get embeddings for a list of texts.
 
         Args:
             texts (list): List of strings to embed
+            timeout (int): Request timeout in seconds
 
         Returns:
             list: List of embedding vectors
@@ -59,6 +60,7 @@ class MaasClient:
                 url=f"{self.api_url}/v1/embeddings",
                 json={"input": texts, "model": self.model_name},
                 headers={"Authorization": f"Bearer {self.api_key}"},
+                timeout=timeout,
             )
             response.raise_for_status()
             result = response.json()
@@ -73,13 +75,14 @@ class MaasClient:
         except Exception as e:
             raise Exception(f"MAAS embeddings API error: {str(e)}")
 
-    def get_completion(self, prompt, max_tokens=1000, temperature=0.0):
+    def get_completion(self, prompt, max_tokens=1000, temperature=0.0, timeout=180):
         """Get completion from the MAAS API.
 
         Args:
             prompt (str): The prompt to send to the model
             max_tokens (int): Maximum number of tokens to generate
             temperature (float): Temperature parameter for generation
+            timeout (int): Request timeout in seconds
 
         Returns:
             str: The generated text
@@ -100,6 +103,7 @@ class MaasClient:
                     "temperature": temperature,
                 },
                 headers={"Authorization": f"Bearer {self.api_key}"},
+                timeout=timeout,
             )
             response.raise_for_status()
             result = response.json()
@@ -120,13 +124,16 @@ class MaasClient:
         except Exception as e:
             raise Exception(f"MAAS completions API error: {str(e)}")
 
-    def get_chat_completion(self, messages, max_tokens=500, temperature=0.0):
+    def get_chat_completion(
+        self, messages, max_tokens=500, temperature=0.0, timeout=180
+    ):
         """Get chat completion from the MAAS API.
 
         Args:
             messages (list): List of message dictionaries with 'role' and 'content'
             max_tokens (int): Maximum number of tokens to generate
             temperature (float): Temperature parameter for generation
+            timeout (int): Request timeout in seconds
 
         Returns:
             str: The generated text
@@ -147,6 +154,7 @@ class MaasClient:
                     "temperature": temperature,
                 },
                 headers={"Authorization": f"Bearer {self.api_key}"},
+                timeout=timeout,
             )
             response.raise_for_status()
             result = response.json()
