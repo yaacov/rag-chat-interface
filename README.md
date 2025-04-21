@@ -205,7 +205,7 @@ These endpoints should follow standard API formats similar to those used by MAAS
    oc expose svc/rag-chat-service
 
    # The service is http:// only, you can ask Openshift, to redirect calls using internal tls
-   # to support https://
+   # to support https:// in the route object
    #
    # tls:
    #   termination: edge

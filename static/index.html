@@ -405,6 +405,12 @@
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({source: readCommand.source})
                     });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.detail || `[${response.status}] ${response.statusText}`);
+                    }
+                    
                     const data = await response.json();
                     responseDiv.innerHTML = `<p><strong>Status:</strong> ${data.message}</p>`;
                 } else {
@@ -413,6 +419,12 @@
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({text: question})
                     });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.detail || `[${response.status}] ${response.statusText}`);
+                    }
+                    
                     const data = await response.json();
                     
                     // Normalize line breaks before parsing markdown
@@ -433,7 +445,7 @@
                 infoButton.disabled = false;
             }
         }
-        
+
         // Utility function to normalize line breaks in markdown text
         function normalizeLineBreaks(text) {
             if (!text) return '';
@@ -482,6 +494,12 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({text: 'dump'})
                 });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || `Error ${response.status}: ${response.statusText}`);
+                }
+                
                 const data = await response.json();
                 let infoHtml = '<h3>System Information:</h3><ul>';
                 for (const [key, value] of Object.entries(data)) {
@@ -502,3 +520,4 @@
     </script>
 </body>
 </html>
+``` 
