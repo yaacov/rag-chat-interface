@@ -381,7 +381,13 @@
         }
 
         async function askQuestion() {
+            // Get the question from the input field
+            // and clear the input field
             const question = document.getElementById('question').value;
+            document.getElementById('question').value = '';
+            if (!question) {
+                return;
+            }
             const loadingDiv = document.getElementById('loading');
             const responseDiv = document.getElementById('response');
             const askButton = document.getElementById('askButton');
@@ -520,4 +526,3 @@
     </script>
 </body>
 </html>
-``` 
