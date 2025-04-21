@@ -220,7 +220,7 @@ def generate_response(query):
         augmented_query = generate_prompt(retrieved_lines_with_distances, query)
 
         response = model.get_completion(
-            augmented_query, max_tokens=1000, temperature=0.0
+            augmented_query, max_tokens=1500, temperature=0.0
         )
 
         execution_time_ms = int((time.time() - start_time) * 1000)

@@ -82,52 +82,52 @@ pip install -r requirements.txt
 
 1. Start the server:
 
-```bash
-.venv/bin/python main.py \
-    [--source INITIAL_SOURCE] \
-    [--host HOST] \
-    [--port PORT] \
-    [--db-path DB_PATH] \
-    [--models-cache-dir CACHE_DIR] \
-    [--downloads-dir DOWNLOADS_DIR] \
-    [--chunk_size CHUNK_SIZE] \
-    [--chunk_overlap CHUNK_OVERLAP] \
-    [--device GPU_DEVICE] \
-    [--llm-model LLM_MODEL_NAME] \
-    [--llm-api-url LLM_API_URL] \
-    [--llm-api-key LLM_API_KEY] \
-    [--embedding-api-url EMBEDDING_API_URL] \
-    [--embedding-api-key EMBEDDING_API_KEY] \
-    [--query-log-db QUERY_LOG_DB] \
-    [--log-queries]
-```
+    ```bash
+    .venv/bin/python main.py \
+        [--source INITIAL_SOURCE] \
+        [--host HOST] \
+        [--port PORT] \
+        [--db-path DB_PATH] \
+        [--models-cache-dir CACHE_DIR] \
+        [--downloads-dir DOWNLOADS_DIR] \
+        [--chunk_size CHUNK_SIZE] \
+        [--chunk_overlap CHUNK_OVERLAP] \
+        [--device GPU_DEVICE] \
+        [--llm-model LLM_MODEL_NAME] \
+        [--llm-api-url LLM_API_URL] \
+        [--llm-api-key LLM_API_KEY] \
+        [--embedding-api-url EMBEDDING_API_URL] \
+        [--embedding-api-key EMBEDDING_API_KEY] \
+        [--query-log-db QUERY_LOG_DB] \
+        [--log-queries]
+    ```
 
-Example:
+    Example:
 
-```bash
-# Override LLM model and GPU device
-.venv/bin/python main.py --llm-model ibm-granite/granite-3.2-8b-instruct --device cpu
-```
+    ```bash
+    # Override LLM model and GPU device
+    .venv/bin/python main.py --llm-model ibm-granite/granite-3.2-8b-instruct --device cpu
+    ```
 
-Arguments:
+    Arguments:
 
-- `--source`: Initial source to load - can be a file, directory, or URL (optional)
-- `--host`: Host to bind the server to (default: 0.0.0.0)
-- `--port`: Port to bind the server to (default: 8000)
-- `--db-path`: Path to the Milvus database file (default: ./rag_milvus.db)
-- `--models-cache-dir`: Directory to store downloaded models (default: ./models_cache)
-- `--downloads-dir`: Directory to store downloaded files (default: ./downloads)
-- `--chunk_size`: Maximum size of each document chunk (default: 1000 characters)
-- `--chunk_overlap`: Overlap between chunks (default: 200 characters)
-- `--device`: Force a specific device (e.g., 'cuda', 'cpu', 'mps'). If not provided, best available device is automatically selected
-- `--llm-model`: Override the default LLM model (default: ibm-granite/granite-3.2-2b-instruct)
-- `--llm-api-url`: URL for the LLM API service (enables MAAS mode for LLM)
-- `--llm-api-key`: API key for the LLM API service
-- `--embedding-model`: Override the default embedding model (default: ibm-granite/granite-embedding-30m-english)
-- `--embedding-api-url`: URL for the embedding API service (enables MAAS mode for embeddings)
-- `--embedding-api-key`: API key for the embedding API service
-- `--query-log-db`: Path to SQLite database for query logging (default: ./query_logs.db)
-- `--log-queries`: Enable logging of queries and responses to SQLite database
+    - `--source`: Initial source to load - can be a file, directory, or URL (optional)
+    - `--host`: Host to bind the server to (default: 0.0.0.0)
+    - `--port`: Port to bind the server to (default: 8000)
+    - `--db-path`: Path to the Milvus database file (default: ./rag_milvus.db)
+    - `--models-cache-dir`: Directory to store downloaded models (default: ./models_cache)
+    - `--downloads-dir`: Directory to store downloaded files (default: ./downloads)
+    - `--chunk_size`: Maximum size of each document chunk (default: 1000 characters)
+    - `--chunk_overlap`: Overlap between chunks (default: 200 characters)
+    - `--device`: Force a specific device (e.g., 'cuda', 'cpu', 'mps'). If not provided, best available device is automatically selected
+    - `--llm-model`: Override the default LLM model (default: ibm-granite/granite-3.2-2b-instruct)
+    - `--llm-api-url`: URL for the LLM API service (enables MAAS mode for LLM)
+    - `--llm-api-key`: API key for the LLM API service
+    - `--embedding-model`: Override the default embedding model (default: ibm-granite/granite-embedding-30m-english)
+    - `--embedding-api-url`: URL for the embedding API service (enables MAAS mode for embeddings)
+    - `--embedding-api-key`: API key for the embedding API service
+    - `--query-log-db`: Path to SQLite database for query logging (default: ./query_logs.db)
+    - `--log-queries`: Enable logging of queries and responses to SQLite database
 
 2. Open your browser and navigate to `http://localhost:8000`
 
@@ -144,14 +144,24 @@ While RAG chat interface is designed to run models locally, you can also connect
 To use MAAS for language model (LLM) capabilities:
 
 ```bash
+# Define environment variables
+export LLM_API_URL="https://your-llm-service.com/api"
+export LLM_API_KEY="your-api-key"
+export LLM_MODEL="ibm-granite/granite-3-8b-instruct"
+export EMBEDDING_API_URL="https://your-embedding-service.com/api"
+export EMBEDDING_API_KEY="your-api-key" 
+export EMBEDDING_MODEL="ibm-granite/granite-embedding-30m-english"
+export CHUNK_SIZE="1000"
+
+# Run with environment variables
 .venv/bin/python main.py \
-    --llm-api-url "https://your-llm-service.com/api" \
-    --llm-api-key "your-api-key" \
-    --llm-model "ibm-granite/granite-3-8b-instruct" \
-    --embedding-api-url "https://your-embedding-service.com/api" \
-    --embedding-api-key "your-api-key" \
-    --embedding-model "ibm-granite/granite-embedding-30m-english" \
-    --chunk_size 1000
+    --llm-api-url "$LLM_API_URL" \
+    --llm-api-key "$LLM_API_KEY" \
+    --llm-model "$LLM_MODEL" \
+    --embedding-api-url "$EMBEDDING_API_URL" \
+    --embedding-api-key "$EMBEDDING_API_KEY" \
+    --embedding-model "$EMBEDDING_MODEL" \
+    --chunk_size $CHUNK_SIZE
 ```
 
 You can mix local and remote models. For example, use a local embedding model with a remote LLM:
