@@ -69,6 +69,7 @@ python utils/crawler.py https://kubernetes.io/docs/ --verbose
 ## Output
 
 The crawler will print:
+
 - A progress indicator (dots) during crawling (in non-verbose mode)
 - A complete list of discovered URLs when finished
 
