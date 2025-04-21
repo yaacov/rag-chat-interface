@@ -14,10 +14,30 @@ class MaasClient:
             api_key (str): The API authentication key
             model_name (str): The model name to use with this service
         """
-        self.api_url = api_url
-        self.api_key = api_key
-        self.model_name = model_name
-        self.is_configured = bool(api_url and api_key and model_name)
+        self.api_url = self.clean_input(api_url)
+        self.api_key = self.clean_input(api_key)
+        self.model_name = self.clean_input(model_name)
+        self.is_configured = bool(self.api_url and self.api_key and self.model_name)
+
+    def clean_input(self, input_str):
+        """Clean input string from whitespace and quotes.
+
+        Args:
+            input_str (str): The input string to clean
+
+        Returns:
+            str: The cleaned string or None if input was None
+        """
+        if input_str is None:
+            return None
+        # Remove leading/trailing whitespace
+        cleaned = input_str.strip()
+        # Remove surrounding quotes (both single and double)
+        if (cleaned.startswith('"') and cleaned.endswith('"')) or (
+            cleaned.startswith("'") and cleaned.endswith("'")
+        ):
+            cleaned = cleaned[1:-1]
+        return cleaned
 
     def get_embeddings(self, texts):
         """Get embeddings for a list of texts.
