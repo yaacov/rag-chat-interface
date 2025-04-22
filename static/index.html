@@ -438,10 +438,24 @@
                         headers: {'Content-Type': 'application/json'},
                         body: JSON.stringify({source: readCommand.source})
                     });
-                    
+
                     if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.detail || `[${response.status}] ${response.statusText}`);
+                        let errorMessage = `[${response.status}] ${response.statusText}`;
+                        try {
+                            const errorData = await response.json();
+                            errorMessage = errorData.detail || errorMessage;
+                        } catch (jsonErr) {
+                            // If not JSON, try to get text
+                            try {
+                                const errorText = await response.text();
+                                if (errorText) {
+                                    errorMessage += ` - ${errorText}`;
+                                }
+                            } catch (textErr) {
+                                // Ignore, fallback to status only
+                            }
+                        }
+                        throw new Error(errorMessage);
                     }
                     
                     const data = await response.json();
