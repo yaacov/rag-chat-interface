@@ -260,6 +260,16 @@ python utils/crawler.py https://example.com/docs/ --verbose
 
 For more details about the crawler utility, see [README_crawler.md](README_crawler.md).
 
+## CLI
+
+[ask_cli.py](utils/ask_cli.py) is a CLI tool for interacting with a rag-chat-interface server.
+
+```bash
+python utils/ask_cli.py --url https://example.com/ask
+```
+
+For more details about the CLI utility, see [README_ask_cli.md](README_ask_cli.md).
+
 ## License
 
 MIT License
